@@ -20,10 +20,12 @@ packages/dev-frontend/
     ├── step1-req-collect/
     ├── step2-ui-dev/
     ├── step3-api-integrate/
-    ├── step4-module-audit/
-    ├── step5-module-test/
-    └── step6-bug-fix/
+    ├── step4-moduletest/
+    └── step5-bug-fix/
 ```
+
+说明：
+- 当前标准流程为：`step1-req-collect` → `step2-ui-dev` → `step3-api-integrate` → `step4-moduletest` → `step5-bug-fix`。
 
 ## Mission 目录规范
 
@@ -32,7 +34,8 @@ packages/dev-frontend/
 ```text
 .ai/missions/{missionId}/
 ├── reqDocs/
-│   └── req.md
+│   ├── req.md
+│   └── issues.md
 ├── apiDoc/
 │   └── api.md
 ├── testDoc/
@@ -93,18 +96,14 @@ sh .ai/dev-frontend/scripts/create-mission.sh
     - orchestrator / 标准链路：`ui/component-mapping.md` -> `ui/` 原始素材 -> `reqDocs/req.md` 中已结构化的页面/交互描述
     - 直接调用 `step2-ui-dev` skill：`ui/component-mapping.md` -> `ui/` 原始素材 -> 当前轮文字描述 -> `reqDocs/req.md` 中已结构化的页面/交互描述
   - 规则：目标模块路径只从 `reqDocs/req.md` 顶部 `模块名` 解析；若 `模块名` 为空、包含非法路径片段，或与已存在的映射文档冲突，则返回 `NEEDS_CONTEXT`
-  - 最小产物：模块入口、基础类型、必要 hooks、至少一个布局入口与作用域样式文件；`defs/service.ts` 仅允许保留 step4 可继续接手的占位实现
+  - 最小产物：模块入口、基础类型、必要 hooks、至少一个布局入口与作用域样式文件；`defs/service.ts` 仅允许保留 `step3-api-integrate` 可继续接手的占位实现
 - `step3-api-integrate`
   - 输入：`apiDoc/api.md` + 目标模块代码 + `config.json`
   - 输出：`defs/service.ts` / `defs/type.ts` 等真实接口联调更新，以及接口差异记录
   - 规则：依据 `api.md` 的 `- 模块名：` 定位模块；必须记录接口风险；严禁对未定接口做静默 mock 伪装
-- `step4-module-audit`
-  - 输入：模块代码 + `reqDocs/req.md` + `apiDoc/api.md` + `config.json`
-  - 输出：审计结论与可确定修复
-  - 规则：只负责全模块审计和确定性修复，不负责替代 step2 新做一轮功能开发
-- `step5-module-test`
-  - 输入：需求 + 代码
-  - 输出：`testDoc/test.md`（PASS/FAIL/BLOCKED）
-- `step6-bug-fix`
-  - 输入：`bugDoc/bug.md` + 测试失败项
-  - 输出：缺陷修复与状态更新
+- `step4-moduletest`
+  - 输入：`reqDocs/req.md` + 模块代码 + 可选 `apiDoc/api.md` / `bugDoc/bug.md`
+  - 输出：`testDoc/test.md`（PASS/FAIL/BLOCKED）；若仍有失败项，同时回写 `bugDoc/bug.md`
+- `step5-bug-fix`
+  - 输入：`bugDoc/bug.md` + 最近一轮测试失败项或开发者提供的缺陷信息
+  - 输出：缺陷修复、状态更新，以及必要时对 `bugDoc/bug.md` 的回写

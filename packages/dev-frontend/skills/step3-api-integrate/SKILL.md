@@ -268,5 +268,5 @@ const tableData = useCreation(
 
 - **直接上游：** `ui-dev`
 - **可选上游：** `req-collect`
-- **质量闸门：** `module-audit`
-- **验收阶段：** `module-test`
+- **主测试阶段：** `module-test`
+- **失败回流：** `bug-fix`

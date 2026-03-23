@@ -7,7 +7,7 @@ description: Use when creating or extending a frontend module from requirements,
 
 ## 概述
 
-根据需求文档、UI 图或明确的口头描述，在现有业务模块内开发页面与交互，或按共享模板搭建新模块。输出必须能直接进入 `api-integrate`、`module-audit` 或 `module-test`，而不是只交付一个“先能跑起来”的页面。
+根据需求文档、UI 图或明确的口头描述，在现有业务模块内开发页面与交互，或按共享模板搭建新模块。输出必须能直接进入 `api-integrate` 和后续 `module-test`，而不是只交付一个“先能跑起来”的页面。
 
 **核心原则：** 先对齐模板和职责边界，再写具体 UI。结构错了，后面的联调、审计和测试都会变慢。
 
@@ -43,7 +43,7 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 
 ## 违反后果
 
-如果模块骨架、Hook 链路或布局职责不符合模板，当前实现视为未完成；在继续接口联调、规范审计或测试前，必须先回退并补齐结构。
+如果模块骨架、Hook 链路或布局职责不符合模板，当前实现视为未完成；在继续接口联调、缺陷修复或最终测试前，必须先回退并补齐结构。
 
 ## 第 1 步：读取上下文
 
@@ -208,5 +208,5 @@ src/modules/{ModuleName}/
 
 - **可选上游：** `req-collect`
 - **直接下游：** `api-integrate`
-- **质量闸门：** `module-audit`
-- **验收阶段：** `module-test`
+- **主测试阶段：** `module-test`
+- **失败回流：** `bug-fix`

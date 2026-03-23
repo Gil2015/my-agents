@@ -1,13 +1,13 @@
 ---
 name: bug-fix
-description: Use when fixing bugs found during module testing, before marking a module as complete
+description: Use when fixing known frontend module defects after module testing exposes failures
 ---
 
 # 缺陷修复
 
 ## 概述
 
-通过根因分析系统性地调查和修复测试报告中的缺陷——绝不靠猜测碰运气。
+通过根因分析系统性地调查和修复缺陷清单中的问题，绝不靠猜测碰运气。修复目标是清理 `module-test` 暴露出的失败项，并为回归验证做好准备。
 
 **核心原则：** 在动代码之前理解根本原因，才能避免"修一个坏两个"的恶性循环。
 
@@ -16,9 +16,9 @@ description: Use when fixing bugs found during module testing, before marking a 
 ## 适用场景
 
 **必须使用：**
-- 测试报告显示 FAIL 结果（Phase 5 输出）
+- `bugDoc/bug.md` 中已有待修复缺陷
 - 开发者报告了需要修复的具体缺陷
-- 代码变更后发现回归问题
+- 历史测试结果或回归验证暴露了明确问题
 
 **例外情况（需征询开发者）：**
 - 问题出在第三方库中（应向上游报告）
@@ -69,8 +69,8 @@ digraph process {
 ### 第 1 步：分诊
 
 阅读缺陷清单：
-- `.ai/test-reports/{module}.bugs.md` — 标记为需 AI 修复的缺陷
-- `.ai/test-reports/{module}.report.md` — 测试失败的完整上下文
+- `.ai/missions/{missionId}/bugDoc/bug.md` — 标记为需修复的缺陷
+- `.ai/missions/{missionId}/testDoc/test.md` — 最近一轮测试上下文（如有）
 
 针对每个缺陷，收集以下信息：
 - 缺陷 ID 和描述
@@ -127,7 +127,7 @@ BUG-001 Root Cause:
 
 ### 第 5 步：更新
 
-更新测试报告：
+更新缺陷文档：
 - 将 AC 状态从 FAIL 改为 PASS
 - 将缺陷条目状态从 OPEN 改为 FIXED
 - 记录修复了什么以及在哪个文件中修复的
@@ -141,7 +141,7 @@ BUG-001 Root Cause:
 | 调查 | 追踪数据流，定位根本原因 | 写出根因分析说明 |
 | 修复 | 最小化的定向代码变更 | 只有出问题的代码被修改 |
 | 验证 | 重新运行失败的测试及相关测试 | 所有相关测试通过 |
-| 更新 | 更新报告和缺陷状态 | 报告反映当前状态 |
+| 更新 | 更新缺陷文档和状态 | 文档反映当前状态 |
 
 ## 常见借口
 
@@ -179,5 +179,5 @@ BUG-001 Root Cause:
 
 ## 集成关系
 
-- **依赖：** `module-test`（Phase 5 输出）
-- **修复后：** 重新运行 `module-test` 进行验证（部分运行——仅涉及受影响的 AC）
+- **依赖：** `module-test` 输出的失败项、`bugDoc/bug.md`，或开发者提供的明确缺陷信息
+- **修复后：** 重新运行受影响范围的回归验证；如需完整复测，再回到 `module-test`

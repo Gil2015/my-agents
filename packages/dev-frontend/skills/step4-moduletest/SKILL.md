@@ -16,8 +16,9 @@ description: Use when testing a frontend module against its acceptance criteria,
 ## 适用场景
 
 **必须使用：**
-- 模块开发（Phase 3）已完成
-- 接口联调（Phase 4）发生变更后
+- 模块开发已完成
+- 接口联调完成后
+- 缺陷修复后需要做回归验证时
 - 模块代码经历重大改动后
 - 在宣布模块"完成"之前
 
@@ -61,9 +62,10 @@ digraph process {
 ### 第 1 步：LOAD — 加载需求
 
 读取结构化需求文档：
-- `.ai/requirements/{module}.req.md` — 所有 REQ/AC 条目
+- `.ai/missions/{missionId}/reqDocs/req.md` — 所有 REQ/AC 条目
 - `src/modules/{module}/` 中的源码 — 理解实际实现
-- `.ai/designs/{module}/component-mapping.md` — 理解预期 UI
+- `.ai/missions/{missionId}/apiDoc/api.md` — 理解接口契约（如存在）
+- `.ai/missions/{missionId}/bugDoc/bug.md` — 理解待回归的问题范围（如存在）
 
 ### 第 2 步：MAP — 制定测试计划
 
@@ -140,11 +142,11 @@ describe('{ModuleName}', () => {
 
 ### 第 6 步：REPORT — 生成测试报告
 
-按照 `references/test-report-format.md` 中的格式生成测试报告。
+按照 `references/test-report-format.md` 中的格式生成测试报告，并写入 `.ai/missions/{missionId}/testDoc/test.md`。
 
 每条 AC 标记为：
 - **PASS**：测试/检查通过
-- **FAIL**：测试/检查失败 — 附上复现步骤并创建 Bug 条目
+- **FAIL**：测试/检查失败 — 附上复现步骤，并在 `.ai/missions/{missionId}/bugDoc/bug.md` 中记录或更新缺陷条目
 - **BLOCKED**：因依赖无法测试（API 未就绪、环境问题等）
 
 ## 速查表
@@ -185,5 +187,5 @@ describe('{ModuleName}', () => {
 
 ## 集成关系
 
-- **依赖：** `ui-dev`（Phase 3），可选依赖 `api-integrate`（Phase 4）
-- **输出消费者：** `bug-fix`（Phase 6）
+- **依赖：** `ui-dev`，可选依赖 `api-integrate`；若本轮是回归验证，可额外读取 `bug-fix` 输出
+- **失败回流：** 若仍有 FAIL 项，回写 `bugDoc/bug.md` 并回到 `bug-fix`

@@ -1,6 +1,6 @@
 # 结构化需求文档格式
 
-`.ai/missions/{module}/reqDoc/req.md` 的模板。
+`.ai/missions/{module}/reqDocs/req.md` 的模板。
 
 ## 完整模板
 
@@ -70,7 +70,7 @@
 
 ## 问题文档格式
 
-`.ai/missions/{module}/reqDoc/issues.md` 的模板：
+`.ai/missions/{module}/reqDocs/issues.md` 的模板：
 
 ```markdown
 # Requirement Issues: {module-name}
@@ -100,7 +100,7 @@
 ## 合并规则
 
 对已有模块重新运行需求收集时：
-1. 先读取已有的 `.ai/missions/{module}/reqDoc/req.md`
+1. 先读取已有的 `.ai/missions/{module}/reqDocs/req.md`
 2. 新需求使用下一个可用的 REQ-ID（不要复用已删除的 ID）
 3. 更新的需求保留原始 REQ-ID，附加 "Updated: {date}" 备注
 4. 删除的需求标记为 `**Status:** REMOVED`（不要删除该段落）

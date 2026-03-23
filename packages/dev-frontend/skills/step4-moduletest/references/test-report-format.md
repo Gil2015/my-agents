@@ -1,6 +1,6 @@
 # 测试报告格式
 
-`.ai/test-reports/{module}.report.md` 的模板。
+`.ai/missions/{missionId}/testDoc/test.md` 的模板。
 
 ## 完整模板
 
@@ -99,7 +99,7 @@ Time:        {N}s
 
 ## Bug 列表格式
 
-对于开发者标记由 AI 修复的 Bug，写入 `.ai/test-reports/{module}.bugs.md`：
+对于测试中发现且需要继续修复的 Bug，写入 `.ai/missions/{missionId}/bugDoc/bug.md`：
 
 ```markdown
 # Bug List: {module-name}

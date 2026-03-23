@@ -33,7 +33,7 @@ description: Use when collecting and organizing requirements from files in a spe
 EVERY UNCLEAR REQUIREMENT MUST BE FLAGGED — NEVER ASSUME PRODUCT INTENT
 ```
 
-发现了一条模糊的需求？把它标记到 `.ai/missions/{module}/reqDoc/issues.md` 中。不要猜测他们的意思。不要用"常识"来填补空白。
+发现了一条模糊的需求？把它标记到 `.ai/missions/{module}/reqDocs/issues.md` 中。不要猜测他们的意思。不要用"常识"来填补空白。
 
 **没有例外：**
 - 不要假设"显而易见"的验收标准 — 让产品来定义
@@ -43,7 +43,7 @@ EVERY UNCLEAR REQUIREMENT MUST BE FLAGGED — NEVER ASSUME PRODUCT INTENT
 
 ## 违反后果
 
-若跳过澄清直接进入开发，后续阶段（`ui-dev`、`api-integrate`、`module-audit`、`module-test`）必须中止并回退到本技能；先补齐 `.ai/missions/{module}/reqDoc/req.md` 和 `issues.md` 后再继续。
+若跳过澄清直接进入开发，后续阶段（`ui-dev`、`api-integrate`、`module-test`、`bug-fix`）必须中止并回退到本技能；先补齐 `.ai/missions/{module}/reqDocs/req.md` 和 `issues.md` 后再继续。
 
 ## 执行流程
 
@@ -119,11 +119,11 @@ digraph process {
 对任何标记为 NEEDS_CLARIFICATION 的需求：
 - 撰写具体的问题（不是泛泛的"你什么意思？"）
 - 在适用时提供可能的解读方案
-- 在 `.ai/missions/{module}/reqDoc/issues.md` 中按需求分组列出问题
+- 在 `.ai/missions/{module}/reqDocs/issues.md` 中按需求分组列出问题
 
 ### 第 5 步：输出
 
-将两个文件写入 `.ai/missions/{module}/reqDoc/`：
+将两个文件写入 `.ai/missions/{module}/reqDocs/`：
 
 1. **`req.md`** — 所有结构化需求（格式参见 references）
 2. **`issues.md`** — 所有标记的待澄清问题（仅在存在不清晰项时生成）
@@ -136,7 +136,7 @@ digraph process {
 | 解析 | 结构化每条需求 | 每条都有编号、描述和验收标准 |
 | 验证 | 检查清晰度和完整性 | 每条已标记为 CLEAR 或 NEEDS_CLARIFICATION |
 | 标记 | 撰写具体问题 | 每条不清晰的需求都有可执行的问题 |
-| 输出 | 写入 .ai/missions/{module}/reqDoc/ 文档 | `req.md` 已生成，包含所有需求 |
+| 输出 | 写入 .ai/missions/{module}/reqDocs/ 文档 | `req.md` 已生成，包含所有需求 |
 
 ## 常见借口
 
@@ -164,4 +164,4 @@ digraph process {
 
 ## 集成关系
 
-- **输出被以下阶段消费：** `ui-dev`、`api-integrate`、`module-audit`、`module-test`
+- **输出被以下阶段消费：** `ui-dev`、`api-integrate`、`module-test`、`bug-fix`
