@@ -34,30 +34,32 @@ AFTER:  Typed service.ts + updated type.ts + mock.ts
 
 获取接口文档：
 
-**从 URL 获取（飞书/Swagger/其他）：**
-- 使用 WebFetch 并携带 `config.js` 中对应的 cookie
-- 飞书文档：使用 `config.feishu.cookie`
-- 解析返回的内容
+**从配置中读取：**
+- 检查 `.ai/missions/{module}/config.json` 中的 `apiDocSources` 字段，获取接口文档的源文件夹路径
+- 读取源文件夹中的所有相关文档
 
-**从本地文件获取：**
-- 如果存在 `.ai/api-docs/{module}.api.md`，则读取该文件
+**从用户指定文件夹获取：**
+- 从用户输入的特定文档来源文件夹路径中读取内容
 
 **从用户输入获取：**
 - 接受用户直接粘贴的接口文档
 
 ### 第 2 步：结构化整理
 
-将原始接口文档转换为结构化格式（参见 `references/api-doc-template.md`）。
+将获取到的原始接口文档转换为结构化格式（参见 `../../references/api-doc-template.md`）。
 
 针对每个接口端点，提取以下信息：
-- HTTP 方法 + 路径
-- 请求参数（query、body、path params）
-- 响应体结构（包含字段类型）
-- 错误码
+- 模块名与需求来源
+- 接口编号（如 API-001）、方法、路径、描述
+- 关联需求与调用场景
+- 请求参数（必填状态、类型、说明）
+- 响应字段（非空状态、类型、说明）
+- 错误码（含义与前端处理策略）
+- Mock 值示例
 
 如果原始文档信息不完整，标记缺失项并向用户确认。
 
-将结构化接口文档写入 `.ai/api-docs/{module}.api.md`。
+将结构化接口文档写入 `.ai/missions/{module}/apiDoc/api.md`。
 
 ### 第 3 步：生成类型定义
 
@@ -160,8 +162,9 @@ export const mock{Endpoint}Response = (): I{Endpoint}Response =>
 
 | 主题 | 文件 |
 |------|------|
-| 接口文档模板（可共享给后端） | `references/api-doc-template.md` |
-| Service 层模式 | `references/service-patterns.md` |
+| 接口文档模板（可共享给后端） | `../../references/api-doc-template.md` |
+| 业务代码模板 | `../../references/module-template` |
+| 代码规则与规范提示 | `../../references/rules.md` |
 
 ## 集成关系
 

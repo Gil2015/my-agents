@@ -90,6 +90,7 @@ if ! cat > "${mission_dir}/config.json" <<JSON
     "type": "manual",
     "notes": ""
   },
+  "apiDocSources": [],
   "mission": {
     "id": "${mission_id}",
     "createdAt": "${created_at}"
