@@ -1,88 +1,76 @@
 ---
 name: ui-dev
-description: 根据需求文档或UI设计图（或口头描述），创建新的前端模块或在现有模块上开发新功能。
+description: Use when creating or extending a frontend module from requirements, UI designs, or direct implementation instructions, following the shared module template
 ---
 
 # UI 开发
 
 ## 概述
 
-按照严格的模块模板架构，创建新的前端模块或在现有模块上开发新功能。
-在 `.ai/missions/{module}/config.json` 提供的业务模块上下文中进行页面和功能的开发。
+根据需求文档、UI 图或明确的口头描述，在现有业务模块内开发页面与交互，或按共享模板搭建新模块。输出必须能直接进入 `api-integrate`、`module-audit` 或 `module-test`，而不是只交付一个“先能跑起来”的页面。
 
-**核心原则：** 每个模块遵循相同的结构 —— 一致性是可维护性和团队效率的基石。
+**核心原则：** 先对齐模板和职责边界，再写具体 UI。结构错了，后面的联调、审计和测试都会变慢。
 
-**违背规则的字面意义，就是违背规则的精神。**
+**违反规则的字面意思就是违反规则的精神。**
 
 ## 适用场景
 
 **必须使用：**
-- 创建新的前端模块/页面
-- 在现有的前端模块上增加新功能或页面
-- 根据第一步整理的需求文档（或跳过第一步直接根据UI图、口头描述）实现 UI
-- 构建模块级组件
+- 新建业务模块或页面
+- 在现有模块上新增一组完整功能或交互
+- 根据 `req-collect` 产出的需求文档实现页面
+- 只有 UI 图或明确口头描述，但仍需落到标准模块结构
 
 **例外情况（需征询开发者）：**
-- 用完即弃的快速原型
-- 修改早于模板规范的已有模块（先确认是否需要迁移）
+- 一次性 PoC 或演示稿，不会进入正式模块体系
+- 明确要求保留旧模块结构，本次不做模板迁移
 
-在想"这个模块太简单了，不需要完整模板"？打住。这是自我合理化。简单模块按规范搭建反而更快。
+觉得“页面很简单，先糊一个文件再说”？停下来。简单页面最容易因为省结构，把后续每一步都拖慢。
 
 ## 铁律
 
-```
-EVERY MODULE MUST FOLLOW THE TEMPLATE ARCHITECTURE — NO SHORTCUTS, NO CUSTOM STRUCTURES
+```text
+EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 ```
 
-如果创建的模块没有遵循正确的目录结构，删掉它，按规范重新搭建。
+布局里混入请求、状态或业务逻辑，就不是“先把页面写出来”，而是在制造后续联调和测试成本。
 
 **没有例外：**
-- 不要因为"没有副作用"就跳过 `hooks/useWatcher.ts` —— 创建一个空文件
-- 不要因为"只是一个处理函数"就把逻辑放进 `layouts/` —— 它属于 `useController`
-- 不要因为"更简单"就使用 `useState` —— 使用 ahooks 的 `useSetState`
-- 不要因为"之后再补"就跳过类型定义 —— 先定义类型
+- `hooks/useWatcher.ts` 没有副作用也要保留空文件
+- `layouts/` 只做展示，不直接发请求，不直接写业务逻辑
+- `useState`、`useCallback`、`useMemo` 不作为默认方案；优先按 `../../references/rules.md` 使用 ahooks 对应模式
+- 类型先落地，再填实现；禁止一路 `any` 写到底
 
-## 执行流程
+## 违反后果
 
-```dot
-digraph process {
-  rankdir=TB
-  node [shape=box, style=filled, fillcolor="#cce5ff"]
+如果模块骨架、Hook 链路或布局职责不符合模板，当前实现视为未完成；在继续接口联调、规范审计或测试前，必须先回退并补齐结构。
 
-  read [label="1. READ\nLoad requirements + mapping"]
-  scaffold [label="2. SCAFFOLD\nCreate directory structure"]
-  define [label="3. DEFINE\nWrite defs/ files"]
-  hook [label="4. HOOK\nImplement hooks/"]
-  layout [label="5. LAYOUT\nImplement layouts/"]
-  component [label="6. COMPONENT\nCreate local components"]
-  verify [label="7. VERIFY\nCheck all conventions"]
+## 第 1 步：读取上下文
 
-  node [shape=diamond, style=filled, fillcolor="#fff3cd"]
-  pass [label="All checks\npass?"]
+读取以下信息：
+- `.ai/missions/{module}/config.json`，确认模块名、上下文和输入来源
+- 需求文档或 `req-collect` 产物（如存在）
+- UI 图、交互说明、组件清单或用户补充说明
 
-  read -> scaffold -> define -> hook -> layout -> component -> verify -> pass
-  pass -> define [label="No — fix"]
-}
-```
+必须先搞清楚：
+- 本次是新建模块，还是在现有模块内扩展
+- 页面要展示哪些数据，分别有哪些加载态、空态、错误态
+- 哪些动作归 `useController`，哪些监听归 `useWatcher`
+- 哪些组件可以直接复用，哪些需要新增本地 `components/`
 
-### 第 1 步：读取上下文
+**若上下文来自 mission 目录，至少执行：**
+- `test -f ".ai/missions/{module}/config.json"`
+- `find ".ai/missions/{module}" -maxdepth 2 -type f | sort`
 
-加载并理解上下文信息：
-- `.ai/missions/{module}/config.json` —— 业务模块配置及相关信息（必需，提供业务模块上下文）
-- 需求文档（可选，可能跳过第一步）
-- 指定的 UI 图（可选，可能是指定文件夹里的图片，也可能是无 UI 的口头描述）
+## 第 2 步：搭建骨架（仅新建模块时）
 
-理解以下内容：
-- 需要在哪个现有的业务模块上开发，或是创建新模块
-- 模块需要展示哪些数据
-- 需要哪些用户交互
-- 应使用哪些组件（来自组件库或现有项目代码）
+以以下基线为准：
+- `../../references/module-template/`
+- `../../references/rules.md`
 
-### 第 2 步：搭建骨架（仅新建模块时）
+目标结构至少包含：
 
-参考业务代码模板 `../../references/module-template` 及 `../../references/rules.md` 中的代码规则提示，创建完整的目录结构。如果是已有模块增加功能，则在现有结构中新增对应文件：
-
-```
+```text
 src/modules/{ModuleName}/
 ├── index.tsx
 ├── defs/
@@ -90,125 +78,135 @@ src/modules/{ModuleName}/
 │   ├── type.ts
 │   └── service.ts
 ├── hooks/
+│   ├── index.ts
 │   ├── useData.ts
 │   ├── useController.ts
-│   ├── useWatcher.ts
-│   └── index.ts
+│   └── useWatcher.ts
 ├── layouts/
+│   ├── index.ts
 │   └── Default/
 │       ├── index.tsx
-│       └── index.module.less
-└── __test__/
-    ├── index.tsx
-    └── mock.ts
+│       └── style.module.less
+├── __test__/
+│   ├── index.tsx
+│   └── mock.ts
+└── utils.ts
 ```
 
-所有文件和目录全部创建，不许遗漏。
+说明：
+- `components/` 为按需目录；如果存在，必须补 `components/index.ts`
+- 模板里的示例占位代码可以作为起点，但交付前必须替换或删除
+- 已有模块扩展时，不重建目录；在现有结构上补缺文件并对齐命名
 
-**验证：** 运行 `ls -R src/modules/{ModuleName}/` 确认每个文件都存在。
+错误示例：
 
-### 第 3 步：编写定义文件 (defs/)
+```text
+src/modules/{ModuleName}/
+├── index.tsx
+└── page.tsx
+```
 
-按以下顺序编写定义文件：
+这不是共享模板，只是临时页面。
 
-1. **`constant.ts`**：MODULE_NAME、LayoutEnum、列定义、静态配置
-2. **`type.ts`**：完整类型链（API 响应 → 数据 → 控制器 → Props）
-3. **`service.ts`**：API 函数桩（真正的实现在之后完成）
+**至少执行：**
+- `find "src/modules/{ModuleName}" -maxdepth 3 -type f | sort`
+- `rg -n "index\\.module\\.less|__MODULE_NAME__|ExampleChildComponent" "src/modules/{ModuleName}"`
 
-参考 `../../references/module-template` 获取模板，并遵循相关规则。
+## 第 3 步：先定义契约（defs/）
 
-**验证：** TypeScript 类型能编译通过。所有类型形成完整链条。
+先写 `defs/`，再写实现。最低要求：
+- `constant.ts`：真实的 `MODULE_NAME`、`LayoutEnum` 及静态配置
+- `type.ts`：补齐并连通 `ModuleRef`、`Props`、`DataParams`、`CtrlParams`、`WatcherParams`、`LayoutProps`、`DataState`
+- `service.ts`：先保留 service 壳或占位实现，后续由 `api-integrate` 替换为真实接口
 
-### 第 4 步：实现 Hooks (hooks/)
+约束：
+- 字段名、枚举值、回调签名先定下来，再让 Hook 和布局围绕它实现
+- 新类型是扩展既有类型链，不是随手另起一套命名
+- 可空字段用 `| null` 表达，不用 `?` 假装“可选”
 
-按依赖顺序实现 Hooks：
+## 第 4 步：实现 Hook 链
 
-1. **`useData.ts`**：状态 + API 数据请求（useSetState、useRequest、useCreation）
-2. **`useController.ts`**：事件处理函数（useMemoizedFn），从 useData 接收数据
-3. **`useWatcher.ts`**：副作用（useEffect、useMount）
-4. **`index.ts`**：聚合器 —— 组合所有 Hook，导出 `_`（数据）和 `$`（控制器）
+顺序固定：
+1. `useData.ts`：状态、派生数据、请求触发入口
+2. `useController.ts`：事件处理与业务动作
+3. `useWatcher.ts`：初始化和监听副作用
+4. `hooks/index.ts`：编排 `useData -> useController -> useWatcher`
 
-参考 `../../references/module-template` 中的 Hook 标准模式，以及 `../../references/rules.md` 中的规范。
+约束：
+- `useController` 通过参数接收 `data`，不跨层直接拿状态
+- `useWatcher` 只处理监听和初始化，不把主要请求逻辑塞进去
+- `hooks/index.ts` 最终返回 `data` 和 `controllers`
+- 默认遵循 `../../references/rules.md` 的 ahooks 映射；如果模板示例仍保留旧写法，以 `rules.md` 为准
 
-**验证：**
-- 不使用 `useState`、`useCallback`、`useMemo` —— 只用 ahooks 的等价物
-- useController 通过参数从 useData 获取数据（而非直接导入状态）
-- index.ts 正确分离 `_` 和 `$`
+## 第 5 步：实现布局与组件
 
-### 第 5 步：实现布局 (layouts/)
+`layouts/Default/index.tsx` 必须是纯展示层：
+- 只接收 `data` 和 `controllers`
+- 不写请求，不持有业务状态，不绕过 Hook 直接操作 service
+- 样式文件统一使用 `style.module.less`
+- 通过 `classNames` + CSS Modules 组织样式
 
-实现 Default 布局：
+本地 `components/`：
+- 只有在现成组件不满足需求时才新增
+- 每个组件单独目录，使用 `index.tsx` + `style.module.less`
+- 保持“展示组件优先”，不要把模块业务逻辑挪进局部组件
 
-1. **`Default/index.tsx`**：纯展示组件
-   - 通过 props 接收 `_` 和 `$`
-   - 使用组件映射或搜索结果中的组件
-   - 无 Hook、无状态、无业务逻辑
-2. **`Default/index.module.less`**：作用域样式
+## 第 6 步：收尾校验
 
-参考 `../../references/module-template` 获取 Layout 模式和约定。
+逐项检查：
+- [ ] 新模块结构与 `../../references/module-template/` 对齐
+- [ ] `index.tsx` 只负责 `createModule(...)` 组装，不写业务逻辑
+- [ ] `defs/type.ts` 的类型链完整且能连通
+- [ ] `hooks/index.ts` 保持 `useData -> useController -> useWatcher`
+- [ ] `layouts/index.ts` 存在 `LayoutEnum.Default -> Default` 映射
+- [ ] 布局和组件样式文件统一使用 `style.module.less`
+- [ ] 布局层只消费 `data` / `controllers`
+- [ ] 无 `useState`、`useCallback`、`useMemo`、模板占位符残留
 
-**验证：**
-- 布局中没有任何 Hook、没有 useState、没有 useEffect
-- 所有数据来自 `_`，所有处理函数来自 `$`
-- 使用 `classNames` + CSS Modules
-
-### 第 6 步：创建组件（如需要）
-
-在 `components/` 中创建模块级组件：
-- 仅当组件映射中标识了尚不存在的组件时才创建
-- 每个组件独立目录，包含 `index.tsx` + `index.module.less`
-- 遵循与布局相同的纯展示原则
-
-### 第 7 步：验证
-
-基于模板规范 `../../references/module-template` 及其约定的完整验证清单：
-
-- [ ] 目录结构与模板一致（若是新建模块）
-- [ ] `index.tsx` 仅负责将 Hook 连接到布局
-- [ ] 所有 Hook 使用 ahooks（useSetState、useRequest、useCreation、useMemoizedFn、useMount）
-- [ ] 类型链完整且相互关联
-- [ ] 布局为纯展示组件
-- [ ] CSS 使用 Modules 配合 classNames
-- [ ] 遵循 `_` / `$` 约定
-- [ ] 无禁止的模式（useState、useCallback、useMemo）
+**至少执行：**
+- `rg -n "__MODULE_NAME__|exampleFn|queryExample|ExampleChildComponent" "src/modules/{ModuleName}"`
+- `rg -n "useState|useCallback|useMemo|index\\.module\\.less" "src/modules/{ModuleName}"`
+- `find "src/modules/{ModuleName}" -maxdepth 3 -type f | sort`
 
 ## 速查表
 
-| 阶段 | 关键活动 | 成功标准 |
+| 阶段 | 关键动作 | 完成标准 |
 |------|---------|---------|
-| 读取上下文 | 加载需求文档 + 组件映射 | 上下文已理解 |
-| 搭建骨架 | 创建所有目录/文件 | 结构与模板一致 |
-| 编写定义 | 编写常量、类型、服务桩 | 类型能编译，链条已连接 |
-| 实现 Hooks | 按 useData → useController → useWatcher → index 顺序实现 | 仅用 ahooks，正确分层 |
-| 实现布局 | 纯展示组件 | 布局中无 Hook/状态 |
-| 创建组件 | 创建所需的本地组件 | 遵循组件模式 |
-| 验证 | 检查所有约定 | 清单所有项目通过 |
+| 读取上下文 | 确认模块边界、数据和交互 | 明确本次是新建还是扩展，输入信息足够落地 |
+| 搭建骨架 | 对齐共享模板结构 | 文件树和命名符合模板基线 |
+| 定义契约 | 先写 `defs/` | 类型链和静态配置可支撑后续实现 |
+| 实现 Hook | 按固定顺序落地 | 数据、控制器、副作用职责清晰 |
+| 实现布局 | 保持展示层纯净 | 布局不直接碰 service 和业务状态 |
+| 收尾校验 | 扫描结构和禁用模式 | 无模板残留和结构性违规 |
 
 ## 常见借口
 
 | 借口 | 现实 |
 |------|------|
-| "这个页面太简单了，不需要 Hook" | 再简单的页面也能从一致的结构中受益 |
-| "之后再重构成模板结构" | 你不会的。从一开始就做对 |
-| "一个字段用 useSetState 太重了" | 一致性 > 微优化 |
-| "布局里只加一个小处理函数" | 放到 useController 里。布局只负责展示 |
-| "我不需要 useWatcher" | 创建一个空文件。未来的你会感谢现在的你 |
+| “这个页面太简单了，不需要 Hook” | 再简单的页面也会从一致的结构中受益 |
+| “先堆在一个文件里，后面再拆” | 后面通常不会拆，而且联调时更难拆 |
+| “一个字段没必要用 `useSetState`” | 一致性比这点微优化更重要 |
+| “布局里放一个小处理函数没关系” | 放到 `useController`，展示层不要偷带逻辑 |
+| “现在没副作用，`useWatcher.ts` 可以不建” | 空文件也是契约的一部分，后面会省事 |
 
-## 危险信号 — 立即停下来重做
+## 危险信号 - 立即停下来重做
 
-- 你正在布局组件中使用 `useEffect` 或 `useState`
-- 你正在布局中直接导入 service 函数
-- 你正在跳过类型链而使用 `any`
-- 你创建了一个扁平模块，没有 hooks/ 和 defs/ 目录
-- 你正在 `index.tsx` 中编写业务逻辑
+- 你在布局组件中使用 `useEffect`、`useState` 或直接导入 service
+- 你创建了扁平模块，没有 `defs/`、`hooks/`、`layouts/` 分层
+- 你在 `index.tsx` 里编写业务逻辑，而不是只组装模块
+- 你跳过类型链，直接用 `any` 或匿名对象向下传
+- 你保留了模板占位符，打算“联调时再说”
 
 ## 参考文档
 
-- `../../references/module-template` —— 业务代码模板，包含目录结构及代码组织规范
-- `../../references/rules.md` —— 业务侧或工程侧的代码规则与规范提示
+| 主题 | 文件 |
+|------|------|
+| 共享模块模板 | `../../references/module-template/` |
+| 业务侧与工程侧代码规则 | `../../references/rules.md` |
 
 ## 集成关系
 
-- **依赖于（可选）：** 第一步输出的需求文档，或者指定的 UI 图/描述
-- **上下文信息：** `.ai/missions/{module}/config.json`
-- **输出供以下阶段使用：** 后续 API 联调或测试阶段
+- **可选上游：** `req-collect`
+- **直接下游：** `api-integrate`
+- **质量闸门：** `module-audit`
+- **验收阶段：** `module-test`
