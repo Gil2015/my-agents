@@ -1,0 +1,69 @@
+.con {
+  display: inline-flex;
+  flex: 1;
+  flex-wrap: wrap;
+  max-width: 100%;
+  align-items: center;
+
+  .btn {
+    position: relative;
+    cursor: pointer;
+    max-width: 200px;
+    margin-bottom: 2px;
+
+    .icon {
+      opacity: 0;
+      position: absolute;
+      top: 7px;
+      right: 2px;
+    }
+
+    &:hover {
+      background-color: var(--m-9-input-bdr-color);
+
+      .icon {
+        opacity: 1;
+      }
+    }
+  }
+
+  .checkbox {
+    align-items: center;
+    margin-left: 15px;
+  }
+}
+
+.btn {
+  display: inline-block;
+  padding: 0 16px;
+  height: 24px;
+  line-height: 22px;
+  background-color: var(--m9-color-bg-background);
+  border-radius: 12px;
+  margin-left: 4px;
+
+  &.active {
+    background-color: var(--m-9-color-primary) !important;
+    color: #fff;
+  }
+}
+
+.create {
+  padding: 0;
+  text-align: center;
+  width: 24px;
+}
+
+.modal {
+  :global {
+    .m9-form-list {
+      margin-top: 10px;
+      margin-bottom: 18px;
+      padding-left: 12px;
+    }
+
+    .m9-modal-footer {
+      margin-top: 0;
+    }
+  }
+}

@@ -1,0 +1,54 @@
+:global(:root[m9-theme="dark"]) {
+  .wrapper {
+    :global {
+      .action-header {
+        padding: 0 6px;
+      }
+    }
+  }
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  :global {
+    .action-header {
+      padding: 0 2px;
+    }
+
+    .action-space {
+      line-height: var(--m-9-table-row-height);
+    }
+  }
+}
+
+.header {
+  display: flex;
+  padding-bottom: 6px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btns {
+  :global {
+    .switch-btn {
+      padding-left: 12px;
+      border-left: 1px solid var(--m-9-color-border);
+
+      .m9-switch {
+        margin-left: 4px;
+      }
+    }
+
+    .anticon {
+      cursor: pointer;
+      vertical-align: middle;
+    }
+  }
+}
+
+.icon {
+  font-size: 12px !important;
+}
