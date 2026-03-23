@@ -48,7 +48,7 @@ digraph process {
   rankdir=TB
   node [shape=box, style=filled, fillcolor="#cce5ff"]
 
-  fetch [label="1. FETCH\nGrab raw content from URLs"]
+  fetch [label="1. FETCH\nRead raw content from target folder"]
   parse [label="2. PARSE\nConvert to structured format"]
   verify [label="3. VERIFY\nCheck each requirement"]
   flag [label="4. FLAG\nMark unclear items"]
@@ -69,12 +69,13 @@ digraph process {
 从提供的来源中获取原始内容。
 
 **从指定文件夹内的文件：**
-- 指定文件路径中读取指定文件
-- 其他 URL：直接抓取
+- 扫描指定文件夹并读取其中的需求文件
+- 按用户指定的文件名或模式过滤目标文件（如有）
 
 **从用户输入：**
 - 接受粘贴的文本、截图或文档内容
 - 解析所提供的任何格式
+- 其他 URL：直接抓取
 
 **验证点：** 原始内容已完整捕获，抓取过程中无数据丢失。
 
