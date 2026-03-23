@@ -107,25 +107,30 @@ export const {functionName} = (params: I{Endpoint}Params) =>
 
 ### 第 5 步：生成 Mock 数据
 
-使用 Mock.js 创建/更新 `__test__/mock.ts`：
+创建/更新 `__test__/mock.ts`(项目已集成msw和mockjs，可以使用mockjs语法)：
 
 ```typescript
-import Mock from 'mockjs';
-import type { I{Endpoint}Response } from '../defs/type';
+import { globalResData } from '../../../../mock/global';
 
-export const mock{Endpoint}Response = (): I{Endpoint}Response =>
-  Mock.mock({
-    // Match response structure from API doc
-    // Use appropriate Mock.js generators:
-    'id': '@guid',
-    'name': '@ctitle(4, 8)',
-    'amount|1000-99999': 1,
-    'rate|0.01-0.10': 1,
-    'status|1': [0, 1, 2],
-    'createdAt': '@datetime("yyyy-MM-dd HH:mm:ss")',
-    'list|10': [{ /* item template */ }],
-    'total|50-200': 1,
-  });
+/**
+ * __MODULE_NAME__ 接口
+ */
+export default {
+  // 示例接口（可删）
+  'example/queryExample': {
+    type: 'post',
+    response: {
+      ...globalResData,
+      'data|20-100': [
+        {
+          'id|+1': '1',
+          'name|1': ['稳赢一号', '稳赢二号', '稳赢三号'],
+          date: '@date',
+        },
+      ],
+    },
+  },
+};
 ```
 
 ### 第 6 步：接入 Hook 层

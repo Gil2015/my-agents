@@ -28,7 +28,12 @@
 ### `defs/` 目录 — 静态定义
 1. **`constant.ts`**：定义 `MODULE_NAME`、枚举（如 `LayoutEnum`）、表格列定义 `columns` 等静态配置。
 2. **`type.ts`**：必须构建**完整的类型链**：API 响应 → 数据类型（`IData`） → 控制器类型（`IController`） → 布局 Props。
-3. **`service.ts`**：存放所有的 API 请求函数桩。
+   - 字段名必须与接口响应完全一致（如果接口使用 snake_case，不要擅自改为 camelCase）。
+   - 可为 null 的字段使用 `| null`（不要用 `?`，那是表示可选，不是表示可为空）。
+   - 对枚举值和含义不明显的字段添加 JSDoc 注释。
+3. **`service.ts`**：存放所有的 API 请求函数桩（以及后续的真实实现）。
+   - 使用统一的 `request` 工具（如 `import request from '@/utils/request';`）。
+   - 严格匹配 HTTP 方法和参数结构（GET 用 `params`，POST/PUT 用 `data`）。
 
 ### `hooks/` 目录 — Hook 模式（三层分离）
 必须严格遵循依赖流向：`useData` → `useController` → `useWatcher` → `index.ts`。
@@ -51,6 +56,10 @@
      - `_`（数据）：只读的展示数据，传给布局。
      - `$`（控制器）：事件处理函数，传给布局。
 
+### `__test__/` 目录 — Mock 与测试
+1. **`mock.ts`**：
+   - 使用 Mock.js 语法生成模拟数据。
+   - 常用模板：`@guid`（UUID），`@cname`（中文名），`@datetime`（日期），`'status|1': [0, 1]`（枚举随机）。
 ### `layouts/` 目录 — 布局模式
 布局组件（如 `Default/index.tsx`）是**纯展示组件**。
 
