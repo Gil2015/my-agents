@@ -76,7 +76,7 @@ digraph process {
 
 ### 第 2 步：搭建骨架
 
-按照 `fe-dev/references/module-template-spec.md` 创建完整的目录结构：
+按照 `references/module-template-spec.md` 创建完整的目录结构：
 
 ```
 src/modules/{ModuleName}/
@@ -157,7 +157,7 @@ src/modules/{ModuleName}/
 
 ### 第 7 步：验证
 
-运行 `fe-dev/references/module-template-spec.md` 中的完整验证清单：
+运行 `references/module-template-spec.md` 中的完整验证清单：
 
 - [ ] 目录结构与模板完全一致
 - [ ] `index.tsx` 仅负责将 Hook 连接到布局
@@ -205,9 +205,9 @@ src/modules/{ModuleName}/
 | 模块创建步骤 | `references/module-creation-steps.md` |
 | Hook 模式 | `references/hook-patterns.md` |
 | 布局模式 | `references/layout-patterns.md` |
-| 模块模板规范 | `fe-dev/references/module-template-spec.md` |
+| 模块模板规范 | `references/module-template-spec.md` |
 
 ## 集成关系
 
-- **依赖于：** `req-collect`（Phase 1 输出）、`fe-dev` UI 审计（Phase 2 输出）
+- **依赖于：** `req-collect`（Phase 1 输出）
 - **输出供以下阶段使用：** `api-integrate`（Phase 4）、`module-test`（Phase 5）

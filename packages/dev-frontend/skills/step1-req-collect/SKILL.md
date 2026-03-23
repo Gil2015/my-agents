@@ -43,7 +43,7 @@ EVERY UNCLEAR REQUIREMENT MUST BE FLAGGED — NEVER ASSUME PRODUCT INTENT
 
 ## 违反后果
 
-若跳过澄清直接进入开发，后续阶段（`fe-dev`、`ui-dev`、`module-test`）必须中止并回退到本技能；先补齐 `.ai/missions/{module}/reqDoc/req.md` 和 `issues.md` 后再继续。
+若跳过澄清直接进入开发，后续阶段（`ui-dev`、`api-integrate`、`module-audit`、`module-test`）必须中止并回退到本技能；先补齐 `.ai/missions/{module}/reqDoc/req.md` 和 `issues.md` 后再继续。
 
 ## 执行流程
 
@@ -160,4 +160,4 @@ digraph process {
 
 ## 集成关系
 
-- **输出被以下阶段消费：** `fe-dev`、`ui-dev`、`module-test`
+- **输出被以下阶段消费：** `ui-dev`、`api-integrate`、`module-audit`、`module-test`
