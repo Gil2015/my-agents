@@ -1,13 +1,13 @@
 ---
 name: req-collect
-description: Use when collecting and organizing requirements from external sources, before starting UI development
+description: Use when collecting and organizing requirements from files in a specified folder, before starting UI development
 ---
 
 # 需求收集
 
 ## 概述
 
-从外部来源（指定文件夹内的文件）收集、结构化并验证需求，转换为下游阶段可直接消费的标准格式。
+从指定文件夹内的需求文件（可含用户补充输入）收集、结构化并验证需求，转换为下游阶段可直接消费的标准格式。
 
 **核心原则：** 需求必须明确、可测试、无歧义 — 绝不假设产品意图。
 
@@ -41,6 +41,10 @@ EVERY UNCLEAR REQUIREMENT MUST BE FLAGGED — NEVER ASSUME PRODUCT INTENT
 - 不要跳过"看起来很简单"的需求 — 它们同样需要结构化
 - "应该"、"可能"、"理想情况下"、"大概"这类词是危险信号 — 标记它们
 
+## 违反后果
+
+若跳过澄清直接进入开发，后续阶段（`fe-dev`、`ui-dev`、`module-test`）必须中止并回退到本技能；先补齐 `.ai/missions/{module}/reqDoc/req.md` 和 `issues.md` 后再继续。
+
 ## 执行流程
 
 ```dot
@@ -66,7 +70,7 @@ digraph process {
 
 ### 第 1 步：抓取
 
-从提供的来源中获取原始内容。
+从指定文件夹和用户补充输入中获取原始内容。
 
 **从指定文件夹内的文件：**
 - 扫描指定文件夹并读取其中的需求文件
@@ -75,9 +79,13 @@ digraph process {
 **从用户输入：**
 - 接受粘贴的文本、截图或文档内容
 - 解析所提供的任何格式
-- 其他 URL：直接抓取
 
 **验证点：** 原始内容已完整捕获，抓取过程中无数据丢失。
+
+**强制验证命令（至少执行）：**
+- `test -d "{source-folder}"` — 确认需求源目录存在
+- `find "{source-folder}" -type f | sort` — 列出所有候选文件，确认未漏扫
+- `find "{source-folder}" -type f -size 0` — 检查空文件并单独标记
 
 ### 第 2 步：解析
 
@@ -134,6 +142,7 @@ digraph process {
 | "写代码时再澄清" | 不清晰的需求会导致返工 — 先澄清再动手 |
 | "设计稿已经说明了" | 设计稿展示的是 UI，不是业务逻辑和边界情况 |
 | "PM 会告诉我哪里不对" | PM 假设你已经理解了 — 显式优于隐式 |
+| "先做主流程，边界条件后面补" | 边界条件通常决定是否可上线 — 需求阶段就要收齐 |
 
 ## 危险信号 — 立即停下来
 

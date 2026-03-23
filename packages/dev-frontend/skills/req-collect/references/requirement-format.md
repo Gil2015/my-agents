@@ -15,6 +15,8 @@
 ### REQ-001: {需求标题}
 - **Priority:** P0 / P1 / P2 / P3
 - **Description:** {清晰、单一职责的描述。最多一段话。}
+- **Source Files:** {来源文件路径，使用相对 `{source-folder}` 的路径；多文件用逗号分隔}
+- **Source Notes (optional):** {关键段落、标题或上下文摘要，便于追溯}
 - **Acceptance Criteria:**
   - [ ] AC-001: {可测试的条件 — 必须能用是/否来验证}
   - [ ] AC-002: {可测试的条件}
@@ -31,6 +33,13 @@
 ### REQ-002: {下一条需求标题}
 ...
 ```
+
+## 来源追溯规则
+
+1. 每条 REQ 必须填写 `Source Files`，至少包含 1 个来源。
+2. 文件路径使用相对 `{source-folder}` 的相对路径，禁止写绝对路径。
+3. 若需求来自多个文件，按主次顺序列出所有来源文件。
+4. 若需求仅来自用户补充输入，填写 `Source Files: USER_INPUT`，并在 `Source Notes` 中写明上下文。
 
 ## 优先级定义
 
@@ -91,7 +100,7 @@
 ## 合并规则
 
 对已有模块重新运行需求收集时：
-1. 先读取已有的 `{module}.req.md`
+1. 先读取已有的 `.ai/missions/{module}/reqDoc/req.md`
 2. 新需求使用下一个可用的 REQ-ID（不要复用已删除的 ID）
 3. 更新的需求保留原始 REQ-ID，附加 "Updated: {date}" 备注
 4. 删除的需求标记为 `**Status:** REMOVED`（不要删除该段落）
