@@ -1,13 +1,14 @@
 ---
 name: ui-dev
-description: Use when creating or implementing a frontend module, before API integration
+description: 根据需求文档或UI设计图（或口头描述），创建新的前端模块或在现有模块上开发新功能。
 ---
 
 # UI 开发
 
 ## 概述
 
-按照严格的模块模板架构，创建并实现前端模块。
+按照严格的模块模板架构，创建新的前端模块或在现有模块上开发新功能。
+在 `.ai/missions/{module}/config.json` 提供的业务模块上下文中进行页面和功能的开发。
 
 **核心原则：** 每个模块遵循相同的结构 —— 一致性是可维护性和团队效率的基石。
 
@@ -17,7 +18,8 @@ description: Use when creating or implementing a frontend module, before API int
 
 **必须使用：**
 - 创建新的前端模块/页面
-- 根据需求和/或设计稿实现 UI
+- 在现有的前端模块上增加新功能或页面
+- 根据第一步整理的需求文档（或跳过第一步直接根据UI图、口头描述）实现 UI
 - 构建模块级组件
 
 **例外情况（需征询开发者）：**
@@ -65,18 +67,20 @@ digraph process {
 
 ### 第 1 步：读取上下文
 
-加载上下文文档：
-- `.ai/requirements/{module}.req.md` —— 结构化需求文档（必需）
-- `.ai/designs/{module}/component-mapping.md` —— 组件映射（如果存在）
+加载并理解上下文信息：
+- `.ai/missions/{module}/config.json` —— 业务模块配置及相关信息（必需，提供业务模块上下文）
+- 需求文档（可选，可能跳过第一步）
+- 指定的 UI 图（可选，可能是指定文件夹里的图片，也可能是无 UI 的口头描述）
 
 理解以下内容：
+- 需要在哪个现有的业务模块上开发，或是创建新模块
 - 模块需要展示哪些数据
 - 需要哪些用户交互
-- 应使用哪些组件（来自映射或搜索结果）
+- 应使用哪些组件（来自组件库或现有项目代码）
 
-### 第 2 步：搭建骨架
+### 第 2 步：搭建骨架（仅新建模块时）
 
-按照 `references/module-template-spec.md` 创建完整的目录结构：
+参考业务代码模板 `../../references/module-template` 及 `../../references/rules.md` 中的代码规则提示，创建完整的目录结构。如果是已有模块增加功能，则在现有结构中新增对应文件：
 
 ```
 src/modules/{ModuleName}/
@@ -109,9 +113,9 @@ src/modules/{ModuleName}/
 
 1. **`constant.ts`**：MODULE_NAME、LayoutEnum、列定义、静态配置
 2. **`type.ts`**：完整类型链（API 响应 → 数据 → 控制器 → Props）
-3. **`service.ts`**：API 函数桩（真正的实现在 Phase 4 完成）
+3. **`service.ts`**：API 函数桩（真正的实现在之后完成）
 
-参见 `references/module-creation-steps.md` 获取模板。
+参考 `../../references/module-template` 获取模板，并遵循相关规则。
 
 **验证：** TypeScript 类型能编译通过。所有类型形成完整链条。
 
@@ -124,7 +128,7 @@ src/modules/{ModuleName}/
 3. **`useWatcher.ts`**：副作用（useEffect、useMount）
 4. **`index.ts`**：聚合器 —— 组合所有 Hook，导出 `_`（数据）和 `$`（控制器）
 
-参见 `references/hook-patterns.md` 获取标准模式。
+参考 `../../references/module-template` 中的 Hook 标准模式，以及 `../../references/rules.md` 中的规范。
 
 **验证：**
 - 不使用 `useState`、`useCallback`、`useMemo` —— 只用 ahooks 的等价物
@@ -141,7 +145,7 @@ src/modules/{ModuleName}/
    - 无 Hook、无状态、无业务逻辑
 2. **`Default/index.module.less`**：作用域样式
 
-参见 `references/layout-patterns.md` 获取模式。
+参考 `../../references/module-template` 获取 Layout 模式和约定。
 
 **验证：**
 - 布局中没有任何 Hook、没有 useState、没有 useEffect
@@ -157,9 +161,9 @@ src/modules/{ModuleName}/
 
 ### 第 7 步：验证
 
-运行 `references/module-template-spec.md` 中的完整验证清单：
+基于模板规范 `../../references/module-template` 及其约定的完整验证清单：
 
-- [ ] 目录结构与模板完全一致
+- [ ] 目录结构与模板一致（若是新建模块）
 - [ ] `index.tsx` 仅负责将 Hook 连接到布局
 - [ ] 所有 Hook 使用 ahooks（useSetState、useRequest、useCreation、useMemoizedFn、useMount）
 - [ ] 类型链完整且相互关联
@@ -200,14 +204,11 @@ src/modules/{ModuleName}/
 
 ## 参考文档
 
-| 主题 | 文件 |
-|------|------|
-| 模块创建步骤 | `references/module-creation-steps.md` |
-| Hook 模式 | `references/hook-patterns.md` |
-| 布局模式 | `references/layout-patterns.md` |
-| 模块模板规范 | `references/module-template-spec.md` |
+- `../../references/module-template` —— 业务代码模板，包含目录结构及代码组织规范
+- `../../references/rules.md` —— 业务侧或工程侧的代码规则与规范提示
 
 ## 集成关系
 
-- **依赖于：** `req-collect`（Phase 1 输出）
-- **输出供以下阶段使用：** `api-integrate`（Phase 4）、`module-test`（Phase 5）
+- **依赖于（可选）：** 第一步输出的需求文档，或者指定的 UI 图/描述
+- **上下文信息：** `.ai/missions/{module}/config.json`
+- **输出供以下阶段使用：** 后续 API 联调或测试阶段
