@@ -18,6 +18,12 @@
 packages/dev-frontend/
 ├── README.md
 ├── package.json
+├── agents/
+│   └── fe-dev-orchestrator/
+│       ├── AGENTS.md
+│       └── prompts/
+│           ├── handoff-gate.md
+│           └── route-planner.md
 ├── references/
 │   ├── doc-templates/
 │   ├── module-template/
@@ -36,6 +42,7 @@ packages/dev-frontend/
 
 说明：
 - 当前标准流程为：`step1-req-collect` → `step2-ui-dev` → `step3-api-integrate` → `step4-moduletest` → `step5-bug-fix`。
+- 真实开发中不要求每次都跑完整链路；新增的 `agents/fe-dev-orchestrator/` 用于根据当前 mission 状态自动选择最小必要步骤，并支持断点续跑。
 - 目录名带 `stepX-` 前缀用于流程排序；对应 skill 名分别是 `req-collect`、`ui-dev`、`api-integrate`、`module-test`、`bug-fix`。
 - 文档模板统一维护在 `references/doc-templates/`；step 私有指南仍放在各自 skill 的 `references/` 下。
 - 所有规则类文件统一维护在 `references/rules/`，包括通用规则、前端代码规则，以及 step4 / step5 的缺陷文档规则。
@@ -112,6 +119,133 @@ packages/dev-frontend/
 # 以下命令面向“已安装到目标项目 .ai/dev-frontend/”的场景
 # 在项目根目录执行，默认使用 ./.ai
 sh .ai/dev-frontend/scripts/create-mission.sh
+```
+
+### 2) 使用协调 Agent 决定本轮步骤
+
+协调 Agent 路径：
+
+```text
+/abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/AGENTS.md
+```
+
+它的职责：
+
+- 先检查当前 mission 是否已经有 `reqDocs/`、`apiDoc/`、`bugDocs/` 和目标模块骨架
+- 根据用户目标决定这轮只跑哪些 steps，而不是默认完整跑 `step1 -> step5`
+- 支持常见断点续跑场景，例如先做 `step1 -> step3`，过一段时间再做 `step4 -> step5`
+- 允许在上下文充分时直接从 `step2`、`step3`、`step4` 或 `step5` 起步
+
+推荐给协调 Agent 的最小输入：
+
+- 当前项目根目录或仓库根目录
+- 当前 mission 路径，或至少给出 `missionId`
+- 这轮明确目标，例如“先做到接口联调”“只整理 bug 不修”“继续修历史 BUG”
+- 当前额外上下文，例如需求文档目录、UI 稿目录、API 文档目录、bug 来源目录
+- 如果你只想跑某一段，明确写出范围，例如“只做 step2”“先做 step1~3”
+
+常见路由示例：
+
+| 当前目标 | 常见路由 |
+|---------|---------|
+| 新需求从整理到基础联调 | `step1 -> step2 -> step3` |
+| 已有明确需求，直接开始做页面 | `step2`，必要时回退 `step1` |
+| 模块已开发好，只补接口联调 | `step3` |
+| 联调后统一收集问题，再安排修复 | `step4 -> step5` |
+| 已有 `bug.md`，继续修历史问题 | `step5` |
+
+可直接复制的调用示例：
+
+```text
+请使用 /abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/AGENTS.md
+
+项目根目录：/abs/path/to/project
+mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
+本轮目标：先完成需求整理、页面开发和接口联调，先不要进入 bug 收集和修复
+补充资料：
+- 需求目录：/abs/path/to/project/.ai/missions/20260324-103000/raw-req
+- UI 资料目录：/abs/path/to/project/.ai/missions/20260324-103000/ui
+- API 文档目录：/abs/path/to/project/.ai/missions/20260324-103000/raw-api
+```
+
+```text
+请使用 /abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/AGENTS.md
+
+项目根目录：/abs/path/to/project
+mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
+本轮目标：上次已经做到 step3，这次只做问题收集和缺陷修复
+限制：如果 bugDocs/bug.md 不够完整，先停在 step4，不要直接进入 step5
+```
+
+### 3) SubAgent 的使用方式
+
+通常不需要用户直接调用 sub-agent。
+
+- `route-planner` 是协调 Agent 的内部前置路由器，用来判断“这轮该跑哪些 step”。
+- `handoff-gate` 是协调 Agent 的内部交接检查器，用来判断“当前阶段能不能进入下一步”。
+
+推荐做法：
+
+- 正常开发时，直接调用 `fe-dev-orchestrator/AGENTS.md`
+- 只有在调试路由逻辑、排查为什么没有继续下一步、或想单独预览阶段规划时，才直接调用 sub-agent
+
+直接调用 sub-agent 的路径：
+
+```text
+/abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/route-planner.md
+/abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/handoff-gate.md
+```
+
+`route-planner` 适用场景：
+
+- 你只想先知道“这轮应该跑哪些 step”，但暂时不执行
+- 你怀疑当前 mission 应该从 `step2` / `step4` 直接起步，想先看路由结果
+- 你想确认用户指定的“只做 1~3”是否满足前置条件
+
+`route-planner` 示例：
+
+```text
+请使用 /abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/route-planner.md
+
+devFrontendRoot: /abs/path/to/project/.ai/dev-frontend
+missionRoot: /abs/path/to/project/.ai/missions/20260324-103000
+userGoal: 这轮只做接口联调，不进入问题收集和修复
+requestedRange: only-step3
+configPath: /abs/path/to/project/.ai/missions/20260324-103000/config.json
+artifactSnapshot:
+- reqDocs/req.md 已存在
+- apiDoc/api.md 不存在
+- bugDocs/bug.md 不存在
+moduleSnapshot:
+- src/modules/FundCalculation 存在
+- index.tsx、defs/、hooks/、layouts/ 已存在
+extraContext:
+- API 文档目录：/abs/path/to/project/.ai/missions/20260324-103000/raw-api
+```
+
+`handoff-gate` 适用场景：
+
+- 你想确认某个 step 结束后是否能安全进入下一步
+- 你想排查 orchestrator 为什么停在当前阶段
+- 你想单独验证 `bug.md` 是否已经足够进入 `step5`
+
+`handoff-gate` 示例：
+
+```text
+请使用 /abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/handoff-gate.md
+
+missionRoot: /abs/path/to/project/.ai/missions/20260324-103000
+currentStep: step4-moduletest
+candidateNextStep: step5-bug-fix
+configPath: /abs/path/to/project/.ai/missions/20260324-103000/config.json
+artifactSnapshot:
+- bugDocs/bug.md 已存在
+- bug.md 中已有 4 个 BUG-* 条目
+- 其中 2 个为 OPEN，2 个为 FIXED
+moduleSnapshot:
+- src/modules/FundCalculation 存在
+- 目标模块关键文件完整
+userGoal: 这轮准备开始修复已登记的缺陷
 ```
 
 ## 阶段输入输出
