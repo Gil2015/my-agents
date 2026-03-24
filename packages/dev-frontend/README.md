@@ -38,15 +38,17 @@ packages/dev-frontend/
 │   └── issues.md
 ├── apiDoc/
 │   └── api.md
-├── testDoc/
-│   └── test.md
-├── bugDoc/
+├── bugDocs/
 │   └── bug.md
 ├── references/
 └── config.json
 ```
 
 `missionId` 命名规则：`YYYYMMDD-HHmmss`，例如 `20260322-081530`。
+
+说明：
+- `bugDocs/bug.md` 是当前 step4 / step5 标准流程的核心交付物。
+- `testDocs/` 不再是当前 step4 的固定产物；若项目单独维护测试文档，可按需扩展。
 
 ## Mission 配置说明
 
@@ -61,6 +63,9 @@ packages/dev-frontend/
     "type": "manual",
     "notes": ""
   },
+  "reqDocSources": [],
+  "apiDocSources": [],
+  "bugDocSources": [],
   "mission": {
     "id": "20260322-081530",
     "createdAt": "2026-03-20T08:00:00Z"
@@ -71,6 +76,7 @@ packages/dev-frontend/
 说明：
 
 - `moduleRoot`、`componentRoot`、`uiLibPackage` 是 mission 初始化时写入的默认值，仅作为初始假设。
+- `bugDocSources` 用于 step4 收口用户补充文档、日志或其他缺陷来源。
 - 在 step2、step3 读取这些字段前，应先确认它们是否匹配真实项目结构。
 
 ## 推荐调用方式
@@ -81,7 +87,6 @@ packages/dev-frontend/
 # 在项目根目录执行，默认使用 ./.ai
 sh .ai/dev-frontend/scripts/create-mission.sh
 ```
-
 
 ## 阶段输入输出
 
@@ -102,8 +107,10 @@ sh .ai/dev-frontend/scripts/create-mission.sh
   - 输出：`defs/service.ts` / `defs/type.ts` 等真实接口联调更新，以及接口差异记录
   - 规则：依据 `api.md` 的 `- 模块名：` 定位模块；必须记录接口风险；严禁对未定接口做静默 mock 伪装
 - `step4-moduletest`
-  - 输入：`reqDocs/req.md` + 模块代码 + 可选 `apiDoc/api.md` / `bugDoc/bug.md`
-  - 输出：`testDoc/test.md`（PASS/FAIL/BLOCKED）；若仍有失败项，同时回写 `bugDoc/bug.md`
+  - 输入：开发者或用户口头问题 + `config.json` 中的 `bugDocSources` + `reqDocs/req.md` + 模块代码 + 可选 `apiDoc/api.md`
+  - 输出：`bugDocs/bug.md`，包含结构化 `BUG-*` 条目和顶部修复进度摘要
+  - 规则：负责问题收集、来源收口和需求对码审查；不负责写测试用例，也不直接修代码
 - `step5-bug-fix`
-  - 输入：`bugDoc/bug.md` + 最近一轮测试失败项或开发者提供的缺陷信息
-  - 输出：缺陷修复、状态更新，以及必要时对 `bugDoc/bug.md` 的回写
+  - 输入：`bugDocs/bug.md` + 目标模块代码 + 可选 `reqDocs/req.md` / `apiDoc/api.md`
+  - 输出：缺陷修复、定向回归结果，以及对 `bugDocs/bug.md` 的状态与进度回写
+  - 规则：只处理已经登记的 `BUG-*`；新发现的问题应回到 `step4-moduletest` 先建档

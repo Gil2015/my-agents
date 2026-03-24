@@ -1,51 +1,57 @@
 ---
 name: module-test
-description: Use when turning frontend module requirements or explicit test points into executable test cases and recorded validation results before release
+description: Use when collecting and structuring frontend module bugs from user feedback, configured source files, and req-to-code audits before bug fixing
 ---
 
-# 模块测试
+# 模块问题收集
 
 ## 概述
 
-根据 `.ai/missions/{module}/reqDocs/req.md` 或开发者明确提出的测试点，先生成或更新 `.ai/missions/{module}/testDocs/test.md`，再补齐自动化测试、执行验证并把结果回写到同一份文档。交付物不是一句“已经测过了”，而是一份可追溯、可复测、可回归的测试资产。
+尽管目录名仍是 `step4-moduletest`，这个阶段的职责已经收敛为“收集问题并建档”，不是写测试用例，也不是修代码。
 
-**核心原则：** 先把测试点写进文档，再声称“已覆盖”。没有落到 `test.md` 的测试点，默认等于没有被管理。
+根据以下来源收集并整理 Bug：
+- 开发者或用户口头描述的问题
+- `.ai/missions/{module}/config.json` 中 `bugDocSources` 指向的文件或目录
+- `.ai/missions/{module}/reqDocs/req.md` 与实际模块代码之间的差异审查
+
+将结果统一沉淀到 `.ai/missions/{module}/bugDocs/bug.md`。交付物不是一句“这里可能有问题”，而是一份可追溯、可排序、可继续交给 `bug-fix` 的缺陷清单。
+
+**核心原则：** 每个可行动的问题都要带上来源、现象和当前状态，写进 `bug.md` 后才算进入修复队列。
 
 **违反规则的字面意思就是违反规则的精神。**
 
 ## 适用场景
 
 **必须使用：**
-- 模块开发完成，准备进入发布前验证
-- 接口联调完成后，需要做完整模块测试
-- 开发者额外给出一批测试点，需要整理成测试文档并执行
-- 缺陷修复后需要做回归验证
-- 在宣布模块“完成”之前，需要沉淀一轮可复用的测试资产
+- 模块开发或联调完成后，需要先盘点当前模块问题再进入修复
+- 开发者、测试或用户零散说了一批问题，需要整理成结构化 Bug 文档
+- `config.json` 中已经配置了 `bugDocSources`，需要把外部问题材料收口
+- 需要对照 `reqDocs/req.md` 做一轮 AI 代码审查，提前发现明显缺口
+- 上一轮修复后又出现新问题，需要继续往同一份 `bug.md` 中追加
 
 **例外情况（需征询开发者）：**
-- 只做一次临时 smoke check，且不会作为正式交付依据
-- 当前既没有需求文档，也没有开发者给出的测试点，测试范围无法确定
+- 问题本质上是需求未定、验收口径变化或产品策略调整
+- 紧急 hotfix 且开发者明确要求先修后补记录
+- 问题完全位于第三方系统、外部服务或基础设施层，当前仓库无法判断
 
-觉得“我先测一遍，文档回头再补”？停下来。回头补的测试文档，通常既不完整，也不可信。
+想着“我先直接修，文档之后再补”？停下来。第四步的职责就是把问题边界收清楚；没收清楚就开始修，只会把范围越改越乱。
 
 ## 铁律
 
 ```text
-EVERY ACCEPTANCE CRITERION OR EXPLICIT TEST POINT MUST BECOME A TEST CASE ENTRY
+EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 ```
 
-你可以决定它是 `TC-*` 还是 `MC-*`，但不能决定“不记录”。
-
 **没有例外：**
-- UI、视觉、响应式、浏览器兼容项也必须落成 `MC-*`
-- 代码可观测逻辑优先补自动化测试，而不是只写一句“已验证”
-- 没有实际执行结果，不准把状态改成 `PASS`
-- 失败项必须关联 Bug 记录，不能只写“有问题”
-- 回归时必须先读取已有 `test.md`，不能把上一轮结果直接覆盖掉
+- 来源可以是 `USER_INPUT`、`bugDocSources`、`AI_AUDIT`
+- 同一症状如果是不同根因，必须拆成不同 `BUG-*`
+- 只有模糊怀疑、没有需求依据或代码证据时，不要伪装成“已确认 Bug”
+- 第四步可以运行现有命令补强证据，但不能在这一阶段改业务代码或新写测试用例
+- `bug.md` 顶部必须能一眼看到当前修复进度和优先处理项
 
 ## 违反后果
 
-如果 `.ai/missions/{module}/testDocs/test.md` 不存在、未覆盖本轮范围，或条目仍然停留在模糊描述层，模块测试视为未完成；带 `FAIL` 项时必须回写 `bugDoc/bug.md` 后再进入 `bug-fix`。
+如果 `.ai/missions/{module}/bugDocs/bug.md` 不存在、没有覆盖本轮问题来源、缺少证据，或顶部进度摘要失真，本轮问题收集视为未完成；`bug-fix` 不应在这种上下文不完整的情况下启动。
 
 ## 执行流程
 
@@ -54,208 +60,221 @@ digraph process {
   rankdir=TB
   node [shape=box, style=filled, fillcolor="#cce5ff"]
 
-  load [label="1. LOAD\nRead sources and scope"]
-  draft [label="2. DRAFT\nCreate or update test.md"]
-  auto [label="3. AUTO\nAdd/update automated tests"]
-  manual [label="4. MANUAL\nDetail manual checklist"]
-  run [label="5. RUN\nExecute and collect evidence"]
-  update [label="6. UPDATE\nWrite status and bugs back"]
+  load [label="1. LOAD\nRead bug scope and sources"]
+  collect [label="2. COLLECT\nIngest user and file inputs"]
+  audit [label="3. AUDIT\nReview code against req.md"]
+  draft [label="4. DRAFT\nCreate or update bug.md"]
+  review [label="5. REVIEW\nDeduplicate and prioritize"]
+  update [label="6. UPDATE\nWrite progress summary"]
 
-  load -> draft -> auto -> manual -> run -> update
+  load -> collect -> audit -> draft -> review -> update
 }
 ```
 
-### 第 1 步：LOAD - 读取上下文与范围
+### 第 1 步：LOAD - 读取问题范围与来源
 
 优先读取以下信息：
-- `.ai/missions/{module}/reqDocs/req.md` - 主需求来源
-- 开发者补充的测试点文档或消息 - 本轮新增测试范围
-- `.ai/missions/{module}/testDocs/test.md` - 已有测试文档，供回归或增量更新时复用
-- `.ai/missions/{module}/apiDoc/api.md` - 接口契约、错误码、边界输入
-- `.ai/missions/{module}/bugDoc/bug.md` - 历史失败项与回归范围
-- `src/modules/{ModuleName}/` - 实际实现和 `__test__/` 现状
+- `.ai/missions/{module}/config.json` - 读取 `bugDocSources`
+- `.ai/missions/{module}/reqDocs/req.md` - 需求、页面结构、交互和验收标准
+- `.ai/missions/{module}/apiDoc/api.md` - 接口契约、错误码和边界输入
+- `.ai/missions/{module}/bugDocs/bug.md` - 历史 Bug 与当前修复进度
+- `bugDocSources` 中列出的文件或目录 - 外部问题材料、日志、截图说明、补充文档
+- `src/modules/{ModuleName}/` - 实际代码、现有测试、类型和依赖链路
+- 开发者或用户当前消息 - 本轮新增问题线索
 
 必须先确认：
-- 本轮是“全量模块测试”还是“指定测试点/回归范围”
-- 哪些条目可自动化为 `TC-*`，哪些只能手动为 `MC-*`
-- 当前 `test.md` 是首次生成，还是在上一轮基础上增量更新
+- 本轮是“首次收集”，还是“在已有 `bug.md` 上增量追加”
+- `bugDocSources` 中的路径是否真实存在；缺失路径不能被静默忽略
+- `req.md` 是否足够定义预期行为；如果预期本身不清晰，应回到 `req-collect`
+- 当前模块代码路径是否已经定位清楚
 
-如果没有 `req.md`，也没有开发者给出的测试点，不要继续脑补测试范围；直接回到开发者处补上下文。
+如果连模块位置、问题来源或需求预期都说不清，就不要假装已经完成审查；先补上下文。
 
 **至少执行：**
 - `test -d ".ai/missions/{module}"`
+- `test -f ".ai/missions/{module}/config.json"`
 - `find ".ai/missions/{module}" -maxdepth 3 -type f | sort`
-- `find "src/modules/{ModuleName}" -maxdepth 3 -type f | sort`
+- `find "src/modules/{ModuleName}" -maxdepth 4 -type f | sort`
 
-### 第 2 步：DRAFT - 梳理测试文档
+### 第 2 步：COLLECT - 收口显式问题来源
 
-以 `../../references/test-doc-template.md` 为模板基线，生成或更新 `.ai/missions/{module}/testDocs/test.md`。
+先把明确提到的问题收进候选列表：
+- 来自开发者或用户口述的问题：保留原意，不要把一句话拆成你自己的需求重写
+- 来自 `bugDocSources` 的文件内容：给每条问题保留来源文件路径
+- 来自已有 `bug.md` 的历史条目：保留原 `BUG-*` 编号和状态，不要重排
 
-梳理规则：
-- 有 `reqDocs/req.md` 时：每条 AC 至少对应 1 个 `TC-*` 或 `MC-*`
-- 有开发者补充测试点时：按原意拆成独立条目，不把多个动作塞进一个 case
-- 同一 AC 同时有主流程、异常流程和边界场景时，拆成多个 case
-- `TC-*` 用于自动化验证；`MC-*` 用于手动、视觉、环境相关验证
-- 初次生成时，条目 `状态` 统一为 `PENDING`
-- 回归时优先复用已有 case ID；只有新增场景才分配新的 `TC-*` 或 `MC-*`
+收口规则：
+- 一个独立问题对应一个独立条目，不把“列表空态错、删除不刷新、弹窗样式偏移”塞进同一个 Bug
+- 同一问题被多个来源重复提到时，合并为一个条目，但在 `来源` 或 `实际结果` 中保留多来源信息
+- 只要问题能映射到“当前预期是什么、现在实际是什么”，就应该建条目
+- 如果问题本质上是“需求不明确”，不要强行记成 Bug；应回到 `req-collect`
+
+### 第 3 步：AUDIT - 对照 req.md 审查代码
+
+默认采用“静态需求对码审查 + 必要时补强证据”的方式。建议按以下顺序检查：
+
+1. 需求映射审查
+   - 把每条 `REQ/AC` 映射到实际的布局、hooks、service、权限分支或交互入口
+   - 缺少实现、实现方向相反、字段映射不一致，都应进入 Bug 候选
+2. 状态与边界审查
+   - 检查加载态、空态、错误态、权限态、禁用态、分页边界、空值和超长值
+   - 检查快速重复点击、异步竞态、成功后未刷新、失败后状态未恢复
+3. 数据与契约审查
+   - 对照 `api.md`、`defs/type.ts`、`service.ts`、`useData`、布局使用处
+   - 找出字段名错位、可空性假设错误、数据适配缺失、错误码处理缺口
+4. 交互路径审查
+   - 沿 `UI -> Layout -> useController -> service -> state update -> render` 追踪
+   - 找出无绑定、条件分支写反、成功动作未回写状态、路由回跳异常等问题
+5. 可选证据补强
+   - 若仓库已有现成测试、lint、typecheck 或低成本复现命令，可定向运行以确认现象
+   - 这一阶段可以验证问题，但不要扩展成“新写测试用例”任务，更不要顺手修代码
+
+如果你没有把“预期行为”和“当前代码行为”做过对照，就不叫审查，只叫猜测。
+
+### 第 4 步：DRAFT - 维护缺陷文档
+
+以 `../../references/bug-doc-template.md` 为模板基线，生成或更新 `.ai/missions/{module}/bugDocs/bug.md`。
+
+维护规则：
+- 已有缺陷保留原 `BUG-*` 编号，不要改号或重排
+- 新缺陷使用下一个可用的 `BUG-*`
+- 新收集的问题默认写成 `OPEN`；只有确认受外部依赖阻塞时才写 `BLOCKED`
+- 这一阶段的重点是把问题描述完整；`### 根因分析` 和 `### 修复方案` 不明确时可先写 `待 step5 分析`
+- `### 回归结果` 初次收集时默认写 `PENDING`
+- 顶部必须更新 `修复进度`、`本轮来源` 和 `优先处理`
 
 填写约定：
-- `模块名`：与实际模块目录保持一致
-- `测试范围`：写清来源，例如 `reqDocs/req.md + USER_INPUT + bugDoc/bug.md`
-- `关联需求` / `关联 AC`：有真实编号就写真实编号；只有用户测试点时填写 `USER_INPUT`
-- `关联接口`：有明确接口时写 `API-*` 或接口标识；没有则写 `无`
-- `场景`：一句话说明被验证的行为，不写空话
-- `前置条件`：明确账号、数据、页面位置、mock 或环境条件
-- `期望结果`：必须能直接判断 `PASS` / `FAIL`
-- `实际结果`：执行前可写 `待执行`，执行后必须回填证据
-- `总状态`：由条目状态汇总得出，不允许拍脑袋填写
+- `来源`：可写 `用户反馈`、`bugDocSources`、`AI审查`，必要时写成组合来源
+- `来源文件`：来自 `bugDocSources` 时写真实路径；没有则写 `无`
+- `关联需求`：能映射到 `REQ-*` / `AC-*` 就写真实编号；纯口述问题可写 `USER_INPUT`
+- `关联代码`：尽量写到具体模块文件或链路入口
+- `复现环境`：如果只是静态审查发现，可写 `代码审查，未运行页面`
+- `实际结果`：必须写看到的现象或代码证据，不写“感觉有问题”
 
 示例：
 
 ```markdown
-# 测试文档（test.md）
+# 缺陷文档（bug.md）
 
 - 模块名：fund-list
-- 测试范围：reqDocs/req.md + USER_INPUT
-- 总状态：PENDING
-- 风险摘要：待执行回归；删除接口需要联调环境支持
+- 当前结论：本轮新增 2 个 OPEN 缺陷，需先处理删除链路和空值渲染问题
+- 修复进度：OPEN 2 / FIXING 0 / FIXED 1 / BLOCKED 0 / WONT_FIX 0
+- 本轮来源：USER_INPUT + config.json:bugDocSources + reqDocs/req.md audit
+- 优先处理：BUG-003, BUG-004
 
-## TC-001
+## BUG-003
 
-- 关联需求：REQ-001
-- 关联 AC：AC-001
-- 关联接口：API-001
-- 类型：自动
-- 场景：空列表时显示空状态占位
-- 前置条件：mock 返回 data.list = []
-- 期望结果：页面显示空状态文案且不渲染表格行
-- 实际结果：待执行
-- 状态：PENDING
-- 已转 Bug：
+- 标题：删除成功后列表未刷新
+- 严重级别：S1
+- 来源：用户反馈 + AI审查
+- 来源文件：无
+- 状态：OPEN
+- 关联需求：REQ-002 / AC-001
+- 关联代码：src/modules/fund-list/hooks/useController.ts
+- 关联接口：API-003
+- 复现环境：本地联调环境，Chrome 136
+- 剩余风险：新增、编辑成功后的刷新链路也可能受同一路径影响
+- 是否关闭：否
 
-### 执行步骤
+### 问题描述
 
-1. 准备空列表 mock 数据
-2. 渲染模块
-3. 断言空状态文案可见，表格数据行为 0
+用户删除成功后仍然看到旧数据，刷新页面后才消失。
+
+### 复现步骤
+
+1. 打开列表页并准备至少 1 条可删除数据
+2. 触发删除操作并等待成功提示
+3. 观察列表是否立即刷新
+
+### 期望结果
+
+删除成功后，列表立即刷新且目标数据消失。
+
+### 实际结果
+
+代码链路显示删除成功后只有提示，没有重新触发列表查询；页面保留旧数据。
+
+### 根因分析
+
+待 step5 分析。
+
+### 修复方案
+
+待 step5 评估。
+
+### 回归结果
+
+- 回归状态：PENDING
+- 回归说明：待进入 step5 修复后验证
 ```
 
-### 第 3 步：AUTO - 补齐自动化测试
+### 第 5 步：REVIEW - 去重、分级、排优先级
 
-把可通过代码稳定验证的 `TC-*` 落到模块的 `__test__/` 目录：
-- `src/modules/{ModuleName}/__test__/index.tsx`
-- 如测试体量较大，可按主题拆分子文件
-- 依赖接口数据时，保持与 `__test__/mock.ts` 的契约一致
+在把文档交给 `bug-fix` 之前，至少完成以下收口：
+- 按严重级别排序：`S0 -> S1 -> S2 -> S3`
+- 检查是否存在“同一根因被拆成多条”或“多个独立问题被硬塞成一条”
+- 确认每条问题都有来源、期望结果、实际结果和最小复现线索
+- 对需求不明确的条目，不要冒充已确认 Bug
+- 对缺失源文件、缺失环境或缺失接口上下文的条目，明确写出阻塞原因
 
-规则：
-- 沿用项目现有测试栈，不要为了当前 skill 引入另一套框架
-- 测试标题或注释必须能追溯到 `TC-ID` / `REQ/AC`
-- 优先覆盖 `useData`、`useController`、`utils`、数据映射、错误处理等稳定逻辑
-- 不要为视觉细节硬写脆弱快照；这类场景放 `MC-*`
-- 若新增了自动化 case，同步把对应条目写回 `test.md`
+### 第 6 步：UPDATE - 更新顶部修复进度摘要
 
-示例：
-
-```typescript
-describe('{ModuleName}', () => {
-  it('TC-001 REQ-001 AC-001 shows empty state when list is empty', async () => {
-    // Arrange
-    // Act
-    // Assert
-  });
-});
-```
-
-### 第 4 步：MANUAL - 补齐手动检查项
-
-为无法稳定自动化的场景完善 `MC-*` 条目：
-- 布局、样式、滚动、吸顶、截断、视觉层级
-- 响应式和不同浏览器渲染
-- 表单可用性、提示反馈、交互节奏
-- 权限、真实接口返回、第三方依赖、外部环境联动
-- 键盘操作、焦点流转、无障碍基础行为（如需求涉及）
-
-要求：
-- 步骤必须可执行，禁止“验证页面正常”这类空话
-- 期望结果必须可直接判定
-- 同一条 `MC` 只验证一个明确结论；不要混入多个无关判断
-- 若手动验证依赖特定浏览器、账号或数据，必须写入前置条件
-
-### 第 5 步：RUN - 执行并记录结果
-
-执行顺序：
-1. 先运行自动化测试
-2. 再按 `MC-*` 执行手动测试
-3. 最后补边界、异常和回归场景
-
-记录规则：
-- `PASS`：实际结果满足期望结果
-- `FAIL`：实际结果不满足期望结果；必须写清复现现象，并在 `.ai/missions/{module}/bugDoc/bug.md` 中记录或更新 Bug
-- `BLOCKED`：因为环境、接口、权限、数据等外部依赖无法验证
-- `PENDING`：只允许暂时存在于未执行条目；收尾时必须解释为什么未执行
-
-证据要求：
-- 自动化 case：在 `实际结果` 中写明执行命令、关键断言或失败摘要
-- 手动 case：在 `实际结果` 中写明浏览器、账号、数据前置和操作结论
-- 不能把“我觉得应该没问题”当作证据
-
-### 第 6 步：UPDATE - 收口并形成结论
-
-更新 `.ai/missions/{module}/testDocs/test.md` 顶部摘要：
-- 只要存在任意 `FAIL`，`总状态` 就是 `FAIL`
-- 没有 `FAIL`，但存在 `BLOCKED` 或关键 `PENDING`，`总状态` 就是 `BLOCKED`
-- 所有条目都通过，`总状态` 才能是 `PASS`
+完成收口后，更新 `.ai/missions/{module}/bugDocs/bug.md` 顶部摘要：
+- `当前结论`：一句话描述本轮发现和当前焦点
+- `修复进度`：按实际状态统计 `OPEN / FIXING / FIXED / BLOCKED / WONT_FIX`
+- `本轮来源`：列出本轮实际使用的来源组合
+- `优先处理`：列出下一步建议先修的 `BUG-*`
 
 同时完成以下动作：
-- 确认每条 REQ/AC 或用户测试点至少落到 1 个 case
-- 确认每个 case 都有 `实际结果` 和最终状态
-- 对失败项补齐 Bug 编号，并回写 `.ai/missions/{module}/bugDoc/bug.md`
-- 在 `风险摘要` 中写明未覆盖风险、阻塞原因和待回归项
+- 确认本轮显式来源都已处理，不留“我看过了但没写”的口袋问题
+- 确认每个 `BUG-*` 都能映射到真实问题，不是空泛描述
+- 对已有历史条目只做增量更新，不覆盖掉原有上下文
+- 若本轮未发现明确 Bug，也保留文档并写清“未发现”的依据和剩余风险
 
 **至少执行：**
-- `test -f ".ai/missions/{module}/testDocs/test.md"`
-- `rg -n "^## (TC|MC)-" ".ai/missions/{module}/testDocs/test.md"`
+- `test -f ".ai/missions/{module}/bugDocs/bug.md"`
+- `rg -n "^## BUG-" ".ai/missions/{module}/bugDocs/bug.md"`
 
 ## 速查表
 
 | 阶段 | 关键活动 | 完成标准 |
 |------|---------|---------|
-| LOAD | 读取需求、测试点、模块代码和历史文档 | 测试范围明确，信息来源可追溯 |
-| DRAFT | 生成或更新 `testDocs/test.md` | 每条 AC 或测试点都已结构化为 case |
-| AUTO | 补齐自动化测试 | 可代码验证的场景已落到 `__test__/` |
-| MANUAL | 补齐手动检查项 | 视觉和环境相关场景有可执行步骤 |
-| RUN | 执行并记录结果 | 每个 case 都有证据和状态 |
-| UPDATE | 汇总状态并回写 Bug | `test.md` 和 `bug.md` 反映当前真实结论 |
+| LOAD | 读取需求、代码、配置和来源文件 | 问题范围明确，来源可追溯 |
+| COLLECT | 收口口头问题和外部文件问题 | 显式输入都已进入候选列表 |
+| AUDIT | 对照 `req.md` 审查代码 | 找到缺口、违背预期或高风险实现 |
+| DRAFT | 生成或更新 `bugDocs/bug.md` | 每个问题都有结构化条目 |
+| REVIEW | 去重、分级、排优先级 | Bug 清单可直接交给修复阶段 |
+| UPDATE | 同步顶部进度摘要 | `bug.md` 顶部状态与条目真实一致 |
 
 ## 常见借口
 
 | 借口 | 现实 |
 |------|------|
-| “我脑子里已经有测试点了” | 没写进 `test.md`，下一轮没人能复用 |
-| “这个交互我手点一下就行” | 手点不是问题，没留下步骤和结论才是问题 |
-| “自动化先不补，人工知道怎么测” | 回归最先遗漏的就是这种“大家都知道”的场景 |
-| “先把结果写成 PASS，晚点补执行” | 这不是测试，是伪造状态 |
-| “接口还没好，先当通过” | 接口没好就是 `BLOCKED`，不是 `PASS` |
+| “这些问题我记在脑子里就行” | 下一轮最先丢掉的就是脑内上下文 |
+| “先修一个大的，其他回头再说” | 你是在让修复范围失控，不是在提速 |
+| “这个像 Bug，但我没时间写文档” | 没写进 `bug.md`，就不算进入队列 |
+| “我已经跑过一遍了，没必要写来源” | 没有来源和证据，别人无法复核 |
+| “代码一眼就能看出来有问题，直接改吧” | 第四步的职责是先收清楚，再交接修复 |
 
 ## 危险信号 - 立即停下来
 
-- 你还没生成 `testDocs/test.md`，就开始宣称“已经覆盖”
-- 一条 AC 没有任何对应 case
-- 你把多个独立结论塞进一个 `TC` 或 `MC`
-- 你在没有执行的情况下，把状态改成 `PASS`
-- 你发现失败项，却没有同步回写 `bugDoc/bug.md`
+- 你已经开始改代码，却还没生成 `bugDocs/bug.md`
+- `bugDocSources` 有路径不存在，但你准备直接忽略
+- 你把“需求未定义”伪装成“代码 Bug”
+- 你把多个独立问题合并成一个 `BUG-*`
+- 你没有对照 `req.md`，却开始凭经验判断“这里应该有问题”
 
 ## 参考文档
 
 | 主题 | 文件 |
 |------|------|
-| 测试文档模板 | `../../references/test-doc-template.md` |
-| 测试策略指南 | `references/test-strategy.md` |
-| 测试文档填写规则 | `references/test-doc-rules.md` |
+| 缺陷文档模板 | `../../references/bug-doc-template.md` |
+| 问题发现与审查指南 | `references/bug-discovery-guide.md` |
+| 缺陷文档填写规则 | `references/bug-doc-rules.md` |
 
 ## 集成关系
 
 - **可选上游：** `req-collect`
 - **直接上游：** `ui-dev`、`api-integrate`
-- **主产物：** `.ai/missions/{module}/testDocs/test.md`
-- **失败回流：** 有 `FAIL` 项时回写 `.ai/missions/{module}/bugDoc/bug.md`，再进入 `bug-fix`
+- **主产物：** `.ai/missions/{module}/bugDocs/bug.md`
+- **下游：** `bug-fix` 只消费已登记的 `BUG-*` 继续修复
