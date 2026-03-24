@@ -7,13 +7,7 @@ description: Use when fixing frontend module bugs that are already registered in
 
 ## 概述
 
-根据 `.ai/missions/{module}/bugDocs/bug.md` 中已经登记的 `BUG-*` 条目，选择本轮要处理的缺陷，完成根因分析、最小化修复、定向回归，并把修复进度回写到同一份 `bug.md`。
-
-这个阶段只负责修复和推进文档进度，不负责收集新 Bug。新的问题来源、需求对码审查和问题建档，都属于 `module-test` 的职责。
-
-**核心原则：** 每一处代码变更都必须能映射到已有 `BUG-*`；每一个宣称“已修复”的 Bug 都必须有回归结果。
-
-**违反规则的字面意思就是违反规则的精神。**
+这个阶段只负责基于 `bugDocs/bug.md` 中已登记的 `BUG-*` 做分析、修复、回归和进度回写，不负责收集新 Bug。交付物是可映射到既有 `BUG-*` 的代码变更，以及状态、根因和回归结果都已同步的同一份 `bug.md`。
 
 ## 适用场景
 
@@ -44,36 +38,29 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - 修复后必须回填 `### 修复方案` 和 `### 回归结果`
 - 顶部 `修复进度`、`当前结论` 和 `优先处理` 必须随真实状态更新
 
+**违反规则的字面意思就是违反规则的精神。**
+
 ## 违反后果
 
 如果代码改动无法映射到已有 `BUG-*`，`bug.md` 没有同步根因和回归结果，或顶部进度摘要仍停留在旧状态，本轮缺陷修复视为未完成。
 
 ## 执行流程
 
-```dot
-digraph process {
-  rankdir=TB
-  node [shape=box, style=filled, fillcolor="#cce5ff"]
-
-  load [label="1. LOAD\nRead bug scope and context"]
-  pick [label="2. PICK\nChoose BUG-* to fix"]
-  analyze [label="3. ANALYZE\nWrite root cause"]
-  fix [label="4. FIX\nApply minimal code change"]
-  regress [label="5. REGRESS\nRun targeted verification"]
-  update [label="6. UPDATE\nSync bug.md progress"]
-
-  load -> pick -> analyze -> fix -> regress -> update
-}
-```
+1. `LOAD`：读取 `bug.md`、`req.md`、`api.md`、模块代码和当前复现上下文。
+2. `PICK`：锁定本轮要处理的 `BUG-*`，按严重级别和依赖关系收敛范围。
+3. `ANALYZE`：沿代码链路找到第一个出错环节，并把根因写回 `bug.md`。
+4. `FIX`：围绕根因做最小且正确的代码改动，不顺手扩展范围。
+5. `REGRESS`：重跑直接路径、相邻关键场景和边界场景，记录真实结论。
+6. `UPDATE`：同步 `bug.md` 条目状态和顶部摘要，确保代码与文档一致。
 
 ### 第 1 步：LOAD - 读取缺陷范围与上下文
 
 优先读取以下信息：
-- `.ai/missions/{module}/bugDocs/bug.md` - 当前缺陷清单、状态、优先级和历史修复信息
-- `.ai/missions/{module}/reqDocs/req.md` - 需求和验收标准，确认正确行为
-- `.ai/missions/{module}/apiDoc/api.md` - 接口契约、错误码和边界输入
-- `src/modules/{ModuleName}/` - 实际实现、现有测试代码和依赖链路
-- 开发者补充的上下文 - 当前 Bug 的复现细节、截图、日志、控制台报错
+- `.ai/missions/{module}/bugDocs/bug.md`：当前缺陷清单、状态、优先级和历史修复信息
+- `.ai/missions/{module}/reqDocs/req.md`：需求和验收标准，确认正确行为
+- `.ai/missions/{module}/apiDoc/api.md`：接口契约、错误码和边界输入
+- `src/modules/{ModuleName}/`：实际实现、现有测试代码和依赖链路
+- 开发者补充的上下文：当前 Bug 的复现细节、截图、日志、控制台报错
 
 必须先确认：
 - 本轮到底修哪几个 `BUG-*`
@@ -104,7 +91,7 @@ digraph process {
 
 ### 第 3 步：ANALYZE - 先写根因，再动代码
 
-针对每个目标 `BUG-*`，沿代码路径追踪到第一个出错环节，并把结论写进 `### 根因分析`。
+针对每个目标 `BUG-*`，沿代码路径追踪到第一个出错环节，并把结论写进 `### 根因分析`。具体分类方法、排查路径和根因写法见 `references/bug-triage-guide.md`。
 
 优先从以下角度排查：
 1. 数据流：Layout -> hooks -> service -> API response
@@ -159,11 +146,14 @@ digraph process {
 - 如当前 Bug 已修完，明确剩余未解问题是什么
 
 状态建议：
-- `OPEN`：已记录，尚未开始修复
-- `FIXING`：正在处理，但还没完成回归
-- `FIXED`：修复完成且回归通过
-- `BLOCKED`：受外部依赖阻塞，当前无法继续
-- `WONT_FIX`：明确决定不修，并记录理由
+
+| 状态 | 含义 |
+|------|------|
+| `OPEN` | 已记录，尚未开始修复 |
+| `FIXING` | 正在处理，但还没完成回归 |
+| `FIXED` | 修复完成且回归通过 |
+| `BLOCKED` | 受外部依赖阻塞，当前无法继续 |
+| `WONT_FIX` | 明确决定不修，并记录理由 |
 
 **至少执行：**
 - `test -f ".ai/missions/{module}/bugDocs/bug.md"`
