@@ -1,8 +1,6 @@
 # @gai/dev-frontend
 
-面向多任务并行场景的前端开发技能包。
-
-采用 mission 工作区模型：每次任务独立存放在 `.ai/missions/{missionId}`，避免文档和配置互相污染。
+面向前端完整开发流程的 skill 包，采用 mission 工作区模型：每次任务独立存放在 `.ai/missions/{missionId}`，避免文档和配置互相污染。
 
 ## 核心原则
 
@@ -41,12 +39,10 @@ packages/dev-frontend/
 ```
 
 说明：
-- 当前标准流程为：`step1-req-collect` → `step2-ui-dev` → `step3-api-integrate` → `step4-moduletest` → `step5-bug-fix`。
-- 真实开发中不要求每次都跑完整链路；新增的 `agents/fe-dev-orchestrator/` 用于根据当前 mission 状态自动选择最小必要步骤，并支持断点续跑。
+- 标准流程为：`step1-req-collect` → `step2-ui-dev` → `step3-api-integrate` → `step4-moduletest` → `step5-bug-fix`，但真实开发中允许按需跳步和断点续跑。
+- `agents/fe-dev-orchestrator/` 用于根据当前 mission 状态自动选择最小必要步骤。
 - 目录名带 `stepX-` 前缀用于流程排序；对应 skill 名分别是 `req-collect`、`ui-dev`、`api-integrate`、`module-test`、`bug-fix`。
-- 文档模板统一维护在 `references/doc-templates/`；step 私有指南仍放在各自 skill 的 `references/` 下。
-- 所有规则类文件统一维护在 `references/rules/`，包括通用规则、前端代码规则，以及 step4 / step5 的缺陷文档规则。
-- 共享模板 `references/module-template/` 是当前前端模块结构和导出约定的第一参考源。
+- `references/doc-templates/`、`references/rules/`、`references/module-template/` 分别维护共享文档模板、规则和模块结构基线。
 
 ## Mission 目录规范
 
@@ -72,8 +68,7 @@ packages/dev-frontend/
 
 说明：
 - skill 文档中的 mission 路径统一写作 `.ai/missions/{missionId}/...`；代码模块目录统一写作 `{ModuleName}` 或 `moduleName`。
-- `bugDocs/bug.md` 是当前 step4 / step5 标准流程的核心交付物。
-- `testDocs/` 不再是当前 step4 的固定产物；若项目单独维护测试文档，可按需扩展。
+- `bugDocs/bug.md` 是 step4 / step5 的核心交付物；`testDocs/` 不再是 step4 固定产物。
 
 ## Mission 配置说明
 
@@ -108,8 +103,7 @@ packages/dev-frontend/
 - `module.name` 是真实业务模块目录名，例如 `FundCalculation`；它与 `mission.id` 没有命名关系，不能互相替代。
 - `module.displayName` 用于文档展示，可为空。
 - `bugDocSources` 用于 step4 收口用户补充文档、日志或其他缺陷来源。
-- step1 应尽量在结构化需求时补齐 `module.name`；step2 及后续代码相关步骤优先读取该字段。
-- 在 step2、step3 读取这些字段前，应先确认它们是否匹配真实项目结构。
+- step1 应尽量补齐 `module.name`；step2、step3 在读取这些字段前应先确认它们匹配真实项目结构。
 
 ## 推荐调用方式
 
@@ -129,12 +123,7 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 /abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/AGENTS.md
 ```
 
-它的职责：
-
-- 先检查当前 mission 是否已经有 `reqDocs/`、`apiDoc/`、`bugDocs/` 和目标模块骨架
-- 根据用户目标决定这轮只跑哪些 steps，而不是默认完整跑 `step1 -> step5`
-- 支持常见断点续跑场景，例如先做 `step1 -> step3`，过一段时间再做 `step4 -> step5`
-- 允许在上下文充分时直接从 `step2`、`step3`、`step4` 或 `step5` 起步
+它会先检查当前 mission 产物和模块骨架，再根据用户目标决定这轮只跑哪些 steps，支持按需跳步和断点续跑。
 
 推荐给协调 Agent 的最小输入：
 
@@ -177,76 +166,7 @@ mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
 限制：如果 bugDocs/bug.md 不够完整，先停在 step4，不要直接进入 step5
 ```
 
-### 3) SubAgent 的使用方式
-
-通常不需要用户直接调用 sub-agent。
-
-- `route-planner` 是协调 Agent 的内部前置路由器，用来判断“这轮该跑哪些 step”。
-- `handoff-gate` 是协调 Agent 的内部交接检查器，用来判断“当前阶段能不能进入下一步”。
-
-推荐做法：
-
-- 正常开发时，直接调用 `fe-dev-orchestrator/AGENTS.md`
-- 只有在调试路由逻辑、排查为什么没有继续下一步、或想单独预览阶段规划时，才直接调用 sub-agent
-
-直接调用 sub-agent 的路径：
-
-```text
-/abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/route-planner.md
-/abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/handoff-gate.md
-```
-
-`route-planner` 适用场景：
-
-- 你只想先知道“这轮应该跑哪些 step”，但暂时不执行
-- 你怀疑当前 mission 应该从 `step2` / `step4` 直接起步，想先看路由结果
-- 你想确认用户指定的“只做 1~3”是否满足前置条件
-
-`route-planner` 示例：
-
-```text
-请使用 /abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/route-planner.md
-
-devFrontendRoot: /abs/path/to/project/.ai/dev-frontend
-missionRoot: /abs/path/to/project/.ai/missions/20260324-103000
-userGoal: 这轮只做接口联调，不进入问题收集和修复
-requestedRange: only-step3
-configPath: /abs/path/to/project/.ai/missions/20260324-103000/config.json
-artifactSnapshot:
-- reqDocs/req.md 已存在
-- apiDoc/api.md 不存在
-- bugDocs/bug.md 不存在
-moduleSnapshot:
-- src/modules/FundCalculation 存在
-- index.tsx、defs/、hooks/、layouts/ 已存在
-extraContext:
-- API 文档目录：/abs/path/to/project/.ai/missions/20260324-103000/raw-api
-```
-
-`handoff-gate` 适用场景：
-
-- 你想确认某个 step 结束后是否能安全进入下一步
-- 你想排查 orchestrator 为什么停在当前阶段
-- 你想单独验证 `bug.md` 是否已经足够进入 `step5`
-
-`handoff-gate` 示例：
-
-```text
-请使用 /abs/path/to/project/.ai/dev-frontend/agents/fe-dev-orchestrator/prompts/handoff-gate.md
-
-missionRoot: /abs/path/to/project/.ai/missions/20260324-103000
-currentStep: step4-moduletest
-candidateNextStep: step5-bug-fix
-configPath: /abs/path/to/project/.ai/missions/20260324-103000/config.json
-artifactSnapshot:
-- bugDocs/bug.md 已存在
-- bug.md 中已有 4 个 BUG-* 条目
-- 其中 2 个为 OPEN，2 个为 FIXED
-moduleSnapshot:
-- src/modules/FundCalculation 存在
-- 目标模块关键文件完整
-userGoal: 这轮准备开始修复已登记的缺陷
-```
+`route-planner` 和 `handoff-gate` 是 orchestrator 的内部 sub-agent，通常不需要单独调用，只有在调试路由或交接判断时才直接使用。
 
 ## 阶段输入输出
 
