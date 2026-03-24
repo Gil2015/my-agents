@@ -1,6 +1,6 @@
 # 使用说明
 
-## 命令
+## 快速命令
 
 默认直接读取同级的 `references/config.json`，一般只需要改这个文件。
 
@@ -8,25 +8,13 @@
 vim references/config.json
 ```
 
-主脚本是 `sh`，配置文件是 `json`。
+入口脚本是 `bash scripts/init-config.sh`，虽然名字叫 `init-config`，但它同时负责读取配置、生成清单和执行 apply。
 
-生成提交清单，并预览 STORY 分组结果和最终提交标题：
-
-```bash
-bash scripts/cherry_pick_flow.sh collect
-```
-
-按配置执行 cherry-pick，并根据 STORY 分组创建提交：
-
-```bash
-bash scripts/cherry_pick_flow.sh apply
-```
-
-如果中途冲突，先由开发人员人工解决并执行 `git cherry-pick --continue`，再恢复脚本流程：
-
-```bash
-bash scripts/cherry_pick_flow.sh apply --resume
-```
+| 操作 | 命令 |
+| --- | --- |
+| 生成提交清单并预览 STORY 分组 | `bash scripts/init-config.sh collect` |
+| 按配置执行 cherry-pick | `bash scripts/init-config.sh apply` |
+| 冲突解决后恢复执行 | `bash scripts/init-config.sh apply --resume` |
 
 ## 配置方式
 
@@ -70,6 +58,12 @@ bash scripts/cherry_pick_flow.sh apply --resume
 - 如果没有找到可用需求内容，则自动回退为 `往期需求缺陷修复`。
 - 没有 STORY 号的提交会保持独立，默认沿用原始 commit message。
 - 如果出现冲突，脚本会直接停止，等待开发人员人工处理；不会自动替你做代码取舍。
+
+## 常见场景
+
+- 先确认 `references/config.json` 中的 `source_branch`、`start_commit`、`author` 都已经更新到本次任务。
+- 如果部分提交在清单里应该显示成其他来源分支，先写入 `branch_overrides`，再重新执行 `collect`。
+- 遇到冲突时先人工判断并执行 `git cherry-pick --continue`，再运行 `bash scripts/init-config.sh apply --resume` 恢复流程。
 
 ## 预期输出
 

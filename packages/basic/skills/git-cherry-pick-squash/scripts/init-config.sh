@@ -559,7 +559,7 @@ cmd_apply() {
       printf '应用提交 %s %s\n' "$commit_hash" "$commit_title"
       write_state "$group_idx" "$((commit_index + 1))"
       if ! run_git cherry-pick -n "$commit_hash"; then
-        die $'cherry-pick 过程中出现冲突。\n这里需要开发人员人工判断并解决冲突，不建议 AI 自行决定保留哪一侧代码。\n请先手工解决冲突并执行 `git cherry-pick --continue`，然后再执行 `bash scripts/cherry_pick_flow.sh apply --resume`。'
+        die $'cherry-pick 过程中出现冲突。\n这里需要开发人员人工判断并解决冲突，不建议 AI 自行决定保留哪一侧代码。\n请先手工解决冲突并执行 `git cherry-pick --continue`，然后再执行 `bash scripts/init-config.sh apply --resume`。'
       fi
     done
 

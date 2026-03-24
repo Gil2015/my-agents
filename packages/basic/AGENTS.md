@@ -1,6 +1,6 @@
 # @gai/basic — 通用技能包
 
-存放与特定技术栈无关的通用技能。
+存放与特定技术栈无关的通用技能，其中也包含少量贴近公司研发协作流程的通用操作 skill。
 
 ## 目录结构
 
@@ -9,12 +9,19 @@ basic/
 ├── CLAUDE.md           # 本文件
 ├── package.json
 └── skills/
+    ├── git-cherry-pick-squash/ # 公司工作时使用的跨分支 cherry-pick / squash skill
     ├── review-skill/   # 审核 Skill 写法
     ├── review-agent/   # 审核 Agent/SubAgent 写法
     └── {skill-name}/   # 每个技能一个目录
         ├── SKILL.md    # 主文件（必需）
         └── references/ # 参考文档（可选）
 ```
+
+## 当前技能
+
+- `review-skill`：审查和优化已有 Skill 写法。
+- `review-agent`：审查和优化 Agent / SubAgent 写法。
+- `git-cherry-pick-squash`：公司工作时使用的提交流转 skill，用于按作者筛选跨分支提交、生成清单，并按 STORY 分组 cherry-pick 到当前分支。
 
 ## 新增技能流程
 
