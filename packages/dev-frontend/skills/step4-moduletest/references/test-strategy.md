@@ -1,189 +1,165 @@
 # 测试策略指南
 
-如何在手动测试和自动化测试之间做出选择，以及如何编写有效的测试。
+如何把需求文档或开发者给出的测试点，拆成可执行的 `TC-*` / `MC-*`，并落到 `.ai/missions/{module}/testDocs/test.md`。
+
+## 从来源到用例
+
+### 需求文档驱动
+
+- 每条 `REQ/AC` 至少对应 1 个测试用例
+- 同一条 AC 如果同时包含主流程、异常流程、边界条件，拆成多个用例
+- 可代码稳定验证的行为优先做成 `TC-*`
+- 视觉、环境、浏览器差异类行为优先做成 `MC-*`
+
+### 用户测试点驱动
+
+当本轮输入来自开发者补充的测试点，而不是 `reqDocs/req.md` 时：
+- 保留用户原意，不要擅自改写测试目标
+- 将每个测试点拆成一个独立用例
+- `关联需求` 和 `关联 AC` 可填写 `USER_INPUT`
+- 在 `场景` 或 `前置条件` 中补充原始上下文
+
+### 回归驱动
+
+当本轮目标是修复后回归时：
+- 先读取已有 `.ai/missions/{module}/testDocs/test.md`
+- 先复测历史 `FAIL` / `BLOCKED` 项
+- 若修复范围扩大，新增回归用例，不要复用无关 case ID
+- 已转 Bug 的用例，复测通过后更新状态并保留 Bug 关联
 
 ## 测试类型决策矩阵
 
-```
-该行为是否在代码中可观测？（数据、逻辑、状态）
-  └─ 是 → 自动化测试
-  └─ 否 → 是否涉及视觉渲染？
-            └─ 是 → 手动检查清单
-            └─ 否 → 是否涉及用户交互流程？
-                      └─ 是 → 手动检查清单（尽可能加入自动化）
-                      └─ 否 → 评估该项是否具有可测试性
+```text
+该行为是否能通过代码稳定断言？
+  └─ 是 -> TC-*（自动化）
+  └─ 否 -> 是否依赖视觉、浏览器、真实环境或人工感知？
+            └─ 是 -> MC-*（手动）
+            └─ 否 -> 继续拆分场景，直到可自动或可手动验证
 ```
 
-## 自动化测试
+## 什么时候选 `TC-*`
 
-### 适合自动化的内容
+适合自动化的内容：
 
-| 类别 | 示例 | 测试方法 |
-|----------|----------|---------------|
-| 工具函数 | formatDate, calculateTotal, parseResponse | 单元测试：输入 → 输出 |
-| 数据转换 | useCreation 计算值 | 使用 mock 数据的单元测试 |
-| Hook 状态逻辑 | useData 初始状态、状态变更 | renderHook + act |
-| Hook 控制器 | useController 处理函数行为 | renderHook + act |
-| 组件渲染 | 给定 props 后是否正确渲染元素 | render + screen 查询 |
-| 条件展示 | 根据数据状态显示/隐藏 | 传入不同 props 进行 render |
+| 类别 | 示例 | 说明 |
+|------|------|------|
+| 工具函数 | `formatDate`、`calculateTotal` | 输入输出可稳定断言 |
+| Hook 状态逻辑 | `useData` 初始值、状态切换 | 适合覆盖数据流和状态变化 |
+| Controller 行为 | 搜索、提交、删除、分页 | 适合覆盖参数组装和事件逻辑 |
+| 数据适配 | API 响应转换为 UI 数据 | 适合覆盖兜底值、映射、异常响应 |
+| 组件条件渲染 | 空态、加载态、错误态 | 适合验证关键 UI 行为是否出现 |
+| 业务错误处理 | 错误码、异常提示、禁用态 | 适合覆盖回归风险点 |
 
-### 测试 Hooks
+规则：
+- 沿用项目现有测试栈
+- 标题或注释带上 `TC-ID` 和 `REQ/AC`
+- 断言行为，不要断言实现细节
+- 不要为了自动化把本应人工确认的视觉判断硬写成脆弱测试
+
+示例：
 
 ```typescript
-import { renderHook, act } from '@testing-library/react-hooks';
-import useData from '../hooks/useData';
-
-describe('useData', () => {
-  it('initializes with default query state', () => {
-    const { result } = renderHook(() => useData());
-    expect(result.current.query.page).toBe(1);
-    expect(result.current.query.pageSize).toBe(10);
-    expect(result.current.loading).toBe(true);
-  });
-
-  it('updates query via setQuery', () => {
-    const { result } = renderHook(() => useData());
-    act(() => {
-      result.current.setQuery({ keyword: 'test' });
-    });
-    expect(result.current.query.keyword).toBe('test');
+describe('FundList', () => {
+  it('TC-001 REQ-001 AC-001 shows empty state when list is empty', async () => {
+    // Arrange
+    // Act
+    // Assert
   });
 });
 ```
 
-### 测试控制器
+## 什么时候选 `MC-*`
 
-```typescript
-import { renderHook, act } from '@testing-library/react-hooks';
-import useController from '../hooks/useController';
+适合手动的内容：
 
-describe('useController', () => {
-  const mockSetQuery = jest.fn();
-  const mockFetchList = jest.fn();
+| 类别 | 示例 | 说明 |
+|------|------|------|
+| 布局与样式 | 对齐、间距、吸顶、截断 | 依赖视觉判断 |
+| 响应式 | 不同视口下展示差异 | 依赖设备或浏览器尺寸 |
+| 浏览器兼容 | Chrome / Safari / Firefox 差异 | 依赖运行环境 |
+| 复杂交互体验 | 拖拽、悬浮、过渡节奏 | 自动化成本高且不稳定 |
+| 权限与真实环境 | 登录态、接口权限、外部系统联动 | 依赖账号和环境 |
+| 可用性细节 | 键盘流转、焦点、提示反馈 | 需要人工实际感受和验证 |
 
-  it('handleSearch resets page to 1', () => {
-    const { result } = renderHook(() =>
-      useController({ setQuery: mockSetQuery, fetchList: mockFetchList })
-    );
-    act(() => {
-      result.current.handleSearch({ keyword: 'test' });
-    });
-    expect(mockSetQuery).toHaveBeenCalledWith({ keyword: 'test', page: 1 });
-  });
-});
-```
-
-### 测试组件
-
-```typescript
-import { render, screen, fireEvent } from '@testing-library/react';
-import Default from '../layouts/Default';
-
-const mockData = {
-  loading: false,
-  list: [{ id: '1', name: 'Test Item', status: 1 }],
-  total: 1,
-  query: { page: 1, pageSize: 10 },
-};
-
-const mockControllers = {
-  handleSearch: jest.fn(),
-  handleDelete: jest.fn(),
-  handleCreate: jest.fn(),
-};
-
-describe('Default Layout', () => {
-  it('renders data in table', () => {
-    render(<Default _={mockData} $={mockControllers} />);
-    expect(screen.getByText('Test Item')).toBeInTheDocument();
-  });
-
-  it('shows loading state', () => {
-    render(<Default _={{ ...mockData, loading: true }} $={mockControllers} />);
-    // Check for spinner/loading indicator
-  });
-
-  it('calls handleCreate on button click', () => {
-    render(<Default _={mockData} $={mockControllers} />);
-    fireEvent.click(screen.getByText('新建'));
-    expect(mockControllers.handleCreate).toHaveBeenCalled();
-  });
-});
-```
-
-## 手动测试
-
-### 检查项格式
+手动用例写法：
 
 ```markdown
-### [M-{number}] {测试名称}
-- **关联验收标准:** REQ-{X}/AC-{Y}
-- **前置条件:** {测试前需满足的条件}
-- **步骤:**
-  1. {操作 1}
-  2. {操作 2}
-  3. {操作 3}
-- **预期结果:** {应该发生什么}
-- **边界情况:**
-  - {变体 1}: {预期行为}
-  - {变体 2}: {预期行为}
-- **结果:** PASS / FAIL / BLOCKED
-- **备注:** {任何观察}
+## MC-001
+
+- 关联需求：REQ-001
+- 关联 AC：AC-003
+- 关联接口：无
+- 类型：手动
+- 场景：移动端视口下筛选栏折叠展示
+- 前置条件：浏览器宽度 <= 768px，使用已登录账号
+- 期望结果：筛选栏默认折叠，点击后展开且不遮挡表格
+- 实际结果：待执行
+- 状态：PENDING
+- 已转 Bug：
+
+### 执行步骤
+
+1. 打开模块页面
+2. 将浏览器宽度调整到 768px 以下
+3. 观察筛选栏初始状态并执行展开操作
 ```
 
-### 手动测试类别
+## 拆分粒度规则
 
-| 类别 | 检查内容 |
-|----------|--------------|
-| 布局/间距 | 元素是否正确对齐，间距是否一致 |
-| 响应式 | 不同视口宽度下是否正常工作 |
-| 加载状态 | 数据请求期间是否显示 Spinner/骨架屏 |
-| 空状态 | 无数据时是否显示合适的占位内容 |
-| 错误状态 | 接口失败时是否显示错误信息 |
-| 表单校验 | 必填字段、格式校验、错误提示信息 |
-| 用户反馈 | 操作后是否显示成功/失败提示 |
-| 导航跳转 | 链接/按钮是否跳转到正确的页面 |
-| 键盘操作 | Tab 顺序、Enter 提交、Escape 关闭 |
-| 滚动行为 | 长列表是否正常滚动、吸顶是否生效 |
+好的拆分方式：
+- 一个用例只验证一个明确结论
+- 同一 AC 的不同风险点拆成多个用例
+- 主流程和边界条件分开记录
 
-## 边界用例检查清单
+坏的拆分方式：
+- “验证页面所有功能正常”
+- 一个 `TC` 里同时覆盖查询、分页、删除、导出
+- 一个 `MC` 里同时验证桌面端、移动端和浏览器兼容
 
-每个模块都应测试的标准边界用例：
+## 边界用例清单
+
+不是每个模块都要全做一遍，但必须明确筛选后再决定取舍：
 
 ### 数据边界
 
-- [ ] 空列表（0 条数据）
-- [ ] 仅一条数据
-- [ ] 最大数据量（使用 500+ 条 mock 数据测试）
-- [ ] 所有字段为 null/undefined
-- [ ] 所有字段达到最大长度
-- [ ] 特殊字符：`<script>alert('xss')</script>`
-- [ ] Unicode：中文、日文、emoji
-- [ ] 超长文本（单字段 1000+ 个字符）
+- [ ] 空列表 / 空对象 / 空字段
+- [ ] 只有 1 条数据
+- [ ] 大数据量（如 500+ 条）
+- [ ] `null` / `undefined` 字段
+- [ ] 超长文本或最大长度输入
+- [ ] 中文、emoji、特殊字符、HTML 实体
 
 ### 交互边界
 
-- [ ] 双击提交按钮
-- [ ] 快速翻页（连续快速点击下一页 10 次）
-- [ ] 接口仍在加载时提交表单
-- [ ] 保存操作进行中时离开页面
+- [ ] 双击提交
+- [ ] 快速连续点击分页或切换筛选
+- [ ] 加载中重复触发动作
 - [ ] 编辑过程中刷新页面
-- [ ] 浏览器后退按钮行为
+- [ ] 浏览器后退 / 前进
 
 ### 状态边界
 
-- [ ] 页面刷新后状态是否保留（如有此预期）
-- [ ] 多个标签页打开同一模块
-- [ ] 操作过程中会话过期
-- [ ] 网络断开后重新连接
+- [ ] 加载态
+- [ ] 空态
+- [ ] 错误态
+- [ ] 权限不足
+- [ ] 网络超时 / 断网恢复
+- [ ] 会话过期
 
-## 覆盖率目标
+### 环境边界
 
-| 测试类型 | 覆盖目标 | 优先级 |
-|-----------|----------------|----------|
-| 正常流程（每条验收标准） | 100% | P0 |
-| 错误状态 | 80%+ | P1 |
-| 边界用例 | 60%+ | P2 |
-| 自动化单元测试 | 所有逻辑函数 | P0 |
-| 自动化 Hook 测试 | 所有 Hooks | P1 |
-| 手动 UI 检查 | 所有可见元素 | P1 |
+- [ ] 不同浏览器
+- [ ] 不同分辨率
+- [ ] 真实接口返回慢或不稳定
+- [ ] 不同角色账号
+
+## 覆盖完成标准
+
+| 维度 | 最低要求 |
+|------|----------|
+| 需求覆盖 | 每条 AC 至少 1 个用例 |
+| 用户测试点覆盖 | 每个显式测试点都已入文档 |
+| 自动化覆盖 | 所有稳定可断言的逻辑都有 `TC-*` |
+| 手动覆盖 | 所有视觉 / 环境类风险都有 `MC-*` |
+| 执行结果 | 每个用例都有 `实际结果` 和最终状态 |
+| 失败闭环 | 每个 `FAIL` 都已关联 Bug |
