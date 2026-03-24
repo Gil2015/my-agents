@@ -48,12 +48,6 @@ if [ ! -d "${workspace_root}" ]; then
   fail_with_status "NEEDS_CONTEXT" "workspaceRoot does not exist. If omitted, the script uses ./.ai under the current working directory."
 fi
 
-script_dir="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
-template_dir="${script_dir}/../templates"
-if [ ! -d "${template_dir}" ]; then
-  fail_with_status "BLOCKED" "Cannot locate step0 templates."
-fi
-
 workspace_abs="$(CDPATH= cd -- "${workspace_root}" && pwd)"
 project_root="$(CDPATH= cd -- "${workspace_root}/.." && pwd)"
 
@@ -86,6 +80,10 @@ if ! cat > "${mission_dir}/config.json" <<JSON
   "moduleRoot": "src/modules",
   "componentRoot": "src/components",
   "uiLibPackage": "",
+  "module": {
+    "name": "",
+    "displayName": ""
+  },
   "source": {
     "type": "manual",
     "notes": ""
@@ -103,13 +101,9 @@ then
   fail_with_status "BLOCKED" "Failed to write config.json."
 fi
 
-if ! mkdir -p "${mission_dir}/references"; then
-  fail_with_status "BLOCKED" "Failed to create references directory."
-fi
-
 print_status \
   "DONE_WITH_CONCERNS" \
-  "Mission created. Confirm moduleRoot, componentRoot, and uiLibPackage before downstream steps." \
+  "Mission created. Confirm moduleRoot, componentRoot, uiLibPackage, and fill module.name before code steps." \
   "MISSION_ID" "${mission_id}" \
   "MISSION_PATH" "${mission_dir}" \
   "WORKSPACE_ROOT" "${workspace_abs}" \

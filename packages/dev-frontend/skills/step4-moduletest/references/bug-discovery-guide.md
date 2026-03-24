@@ -8,13 +8,13 @@
 
 1. 用户或开发者当前明确提到的问题
 2. `config.json` 中 `bugDocSources` 指向的外部材料
-3. 根据 `.ai/missions/{module}/reqDocs/req.md` 对代码做静态审查发现的问题
+3. 根据 `.ai/missions/{missionId}/reqDocs/req.md` 对代码做静态审查发现的问题
 
 原因很简单：显式问题优先级最高，源文件问题次之，AI 审查补盲区。
 
 ## `bugDocSources` 读取规则
 
-- 路径必须来自 `.ai/missions/{module}/config.json`
+- 路径必须来自 `.ai/missions/{missionId}/config.json`
 - 文件和目录都可作为来源
 - 相对路径优先按 `projectRoot` 解析
 - 路径不存在时，不要静默忽略；要在 `bug.md` 顶部结论或阻塞说明中写明

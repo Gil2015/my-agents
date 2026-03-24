@@ -1,12 +1,13 @@
 # 缺陷文档填写规则
 
-`.ai/missions/{module}/bugDocs/bug.md` 在问题收集阶段的填写与更新规则。主模板以 `../doc-templates/bug-doc-template.md` 为准，本文件补充收口阶段的字段约束和进度摘要规则。
+`.ai/missions/{missionId}/bugDocs/bug.md` 在问题收集阶段的填写与更新规则。主模板以 `../doc-templates/bug-doc-template.md` 为准，本文件补充收口阶段的字段约束和进度摘要规则。
 
 ## 顶部摘要填写规则
 
 | 字段 | 填写方式 | 说明 |
 |------|---------|------|
 | 模块名 | 与实际模块目录一致 | 不写页面标题或口语简称 |
+| 模块显示名 | 可选，优先沿用 `config.json.module.displayName` | 只用于文档展示，不参与代码路径解析 |
 | 当前结论 | 1 句总结本轮发现 | 例如“本轮新增 2 个 OPEN 缺陷，先处理删除和空值链路” |
 | 修复进度 | `OPEN x / FIXING y / FIXED z / BLOCKED n / WONT_FIX m` | 必须由当前条目状态统计得出 |
 | 本轮来源 | 列出真实来源组合 | 例如 `USER_INPUT + bugDocSources + reqDocs/req.md audit` |

@@ -42,7 +42,7 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 
 ## 违反后果
 
-如果 `.ai/missions/{module}/bugDocs/bug.md` 不存在、没有覆盖本轮问题来源、缺少证据，或顶部进度摘要失真，本轮问题收集视为未完成；`bug-fix` 不应在这种上下文不完整的情况下启动。
+如果 `.ai/missions/{missionId}/bugDocs/bug.md` 不存在、没有覆盖本轮问题来源、缺少证据，或顶部进度摘要失真，本轮问题收集视为未完成；`bug-fix` 不应在这种上下文不完整的情况下启动。
 
 ## 执行流程
 
@@ -56,10 +56,10 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 ### 第 1 步：LOAD - 读取问题范围与来源
 
 优先读取以下信息：
-- `.ai/missions/{module}/config.json`：读取 `bugDocSources`
-- `.ai/missions/{module}/reqDocs/req.md`：需求、页面结构、交互和验收标准
-- `.ai/missions/{module}/apiDoc/api.md`：接口契约、错误码和边界输入
-- `.ai/missions/{module}/bugDocs/bug.md`：历史 Bug 与当前修复进度
+- `.ai/missions/{missionId}/config.json`：读取 `bugDocSources`、`module.name`
+- `.ai/missions/{missionId}/reqDocs/req.md`：需求、页面结构、交互和验收标准
+- `.ai/missions/{missionId}/apiDoc/api.md`：接口契约、错误码和边界输入
+- `.ai/missions/{missionId}/bugDocs/bug.md`：若已存在，读取历史 Bug 与当前修复进度
 - `bugDocSources` 中列出的文件或目录：外部问题材料、日志、截图说明、补充文档
 - `src/modules/{ModuleName}/`：实际代码、现有测试、类型和依赖链路
 - 开发者或用户当前消息：本轮新增问题线索
@@ -68,14 +68,14 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 - 本轮是首次收集，还是在已有 `bug.md` 上增量追加
 - `bugDocSources` 中的路径是否真实存在；缺失路径不能被静默忽略
 - `req.md` 是否足够定义预期行为；如果预期本身不清晰，应回到 `req-collect`
-- 当前模块代码路径是否已经定位清楚
+- 当前模块代码路径是否已经定位清楚；优先读取 `config.json.module.name`，再校验 `req.md` / `api.md` 顶部 `模块名`
 
 如果连模块位置、问题来源或需求预期都说不清，就不要假装已经完成审查；先补上下文。
 
 **至少执行：**
-- `test -d ".ai/missions/{module}"`
-- `test -f ".ai/missions/{module}/config.json"`
-- `find ".ai/missions/{module}" -maxdepth 3 -type f | sort`
+- `test -d ".ai/missions/{missionId}"`
+- `test -f ".ai/missions/{missionId}/config.json"`
+- `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 - `find "src/modules/{ModuleName}" -maxdepth 4 -type f | sort`
 
 ### 第 2 步：COLLECT - 收口显式问题来源
@@ -116,7 +116,7 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 
 ### 第 4 步：DRAFT - 维护缺陷文档
 
-以 `../../references/doc-templates/bug-doc-template.md` 为模板基线，生成或更新 `.ai/missions/{module}/bugDocs/bug.md`。
+以 `../../references/doc-templates/bug-doc-template.md` 为模板基线，生成或更新 `.ai/missions/{missionId}/bugDocs/bug.md`。
 
 维护规则：
 - 已有缺陷保留原 `BUG-*` 编号，不要改号或重排
@@ -159,8 +159,8 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 - 若本轮未发现明确 Bug，也保留文档并写清“未发现”的依据和剩余风险
 
 **至少执行：**
-- `test -f ".ai/missions/{module}/bugDocs/bug.md"`
-- `rg -n "^## BUG-" ".ai/missions/{module}/bugDocs/bug.md"`
+- `test -f ".ai/missions/{missionId}/bugDocs/bug.md"`
+- `rg -n "^## BUG-" ".ai/missions/{missionId}/bugDocs/bug.md"`
 
 ## 速查表
 
@@ -204,5 +204,5 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 
 - **可选上游：** `req-collect`
 - **直接上游：** `ui-dev`、`api-integrate`
-- **主产物：** `.ai/missions/{module}/bugDocs/bug.md`
+- **主产物：** `.ai/missions/{missionId}/bugDocs/bug.md`
 - **下游：** `bug-fix` 只消费已登记的 `BUG-*` 继续修复

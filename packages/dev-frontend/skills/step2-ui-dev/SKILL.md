@@ -38,7 +38,7 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 **没有例外：**
 - `hooks/useWatcher.ts` 没有副作用也要保留空文件
 - `layouts/` 只做展示，不直接发请求，不直接写业务逻辑
-- `useState`、`useCallback`、`useMemo` 不作为默认方案；优先按 `../../references/rules/frontend-code-rules.md` 使用 ahooks 对应模式
+- 优先沿用 `../../references/module-template/` 的 hooks 组织方式与工程约定，不额外发明一套分层
 - 类型先落地，再填实现；禁止一路 `any` 写到底
 
 ## 违反后果
@@ -48,19 +48,25 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 ## 第 1 步：读取上下文
 
 读取以下信息：
-- `.ai/missions/{module}/config.json`，确认模块名、上下文和输入来源
+- `.ai/missions/{missionId}/config.json`，确认 `module.name`、模块根路径、上下文和输入来源
 - 需求文档或 `req-collect` 产物（如存在）
 - UI 图、交互说明、组件清单或用户补充说明
 
 必须先搞清楚：
 - 本次是新建模块，还是在现有模块内扩展
+- 真实目标模块目录名是什么，是否已经写入 `config.json.module.name`
 - 页面要展示哪些数据，分别有哪些加载态、空态、错误态
 - 哪些动作归 `useController`，哪些监听归 `useWatcher`
 - 哪些组件可以直接复用，哪些需要新增本地 `components/`
 
+目标模块路径解析顺序：
+1. `config.json.module.name`
+2. `reqDocs/req.md` 顶部 `模块名`
+3. 若两者冲突、为空，或包含非法路径片段，则返回 `NEEDS_CONTEXT`
+
 **若上下文来自 mission 目录，至少执行：**
-- `test -f ".ai/missions/{module}/config.json"`
-- `find ".ai/missions/{module}" -maxdepth 2 -type f | sort`
+- `test -f ".ai/missions/{missionId}/config.json"`
+- `find ".ai/missions/{missionId}" -maxdepth 2 -type f | sort`
 
 ## 第 2 步：搭建骨架（仅新建模块时）
 

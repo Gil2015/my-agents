@@ -1,6 +1,7 @@
 # 缺陷文档（bug.md）
 
 - 模块名：
+- 模块显示名：
 - 当前结论：
 - 修复进度：OPEN 0 / FIXING 0 / FIXED 0 / BLOCKED 0 / WONT_FIX 0
 - 本轮来源：

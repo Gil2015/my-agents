@@ -1,6 +1,6 @@
 # Bug 分析指南
 
-如何分析、分类和排序已经登记在 `.ai/missions/{module}/bugDocs/bug.md` 中的前端模块缺陷，并把根因结论写回 `bug.md`。
+如何分析、分类和排序已经登记在 `.ai/missions/{missionId}/bugDocs/bug.md` 中的前端模块缺陷，并把根因结论写回 `bug.md`。
 
 ## 前提
 

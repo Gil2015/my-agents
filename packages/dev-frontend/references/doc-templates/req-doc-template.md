@@ -1,11 +1,21 @@
 # 需求文档模板（req.md / issues.md）
 
-适用于 step1 `req-collect` 产出的 `.ai/missions/{module}/reqDocs/req.md` 和 `.ai/missions/{module}/reqDocs/issues.md`。
+适用于 step1 `req-collect` 产出的 `.ai/missions/{missionId}/reqDocs/req.md` 和 `.ai/missions/{missionId}/reqDocs/issues.md`。
+
+## 模块命名约定
+
+1. 顶部 `模块名` 必须与 `config.json.module.name` 一致。
+2. `模块显示名` 用于文档展示，可为空。
+3. `missionId` 是任务目录名，不写进 `模块名` 字段。
 
 ## `req.md` 模板
 
 ```markdown
-# Module: {module-name}
+# 需求文档（req.md）
+
+- 模块名：FundCalculation
+- 模块显示名：基金测算
+- 需求来源：USER_INPUT / docs/requirement.md
 
 ## Summary
 {1-2 句话概述该模块的功能}
@@ -53,16 +63,19 @@
 ## 验收标准编写规则
 
 好的验收标准：
+
 - "用户可以看到包含以下列的表格：名称、状态、日期、操作"
 - "点击删除按钮后，先显示确认弹窗再执行删除"
 - "空状态显示'暂无数据'文案和插图"
 
 差的验收标准：
+
 - "页面正常运行"（不可测试）
 - "用户体验良好"（主观判断）
 - "数据加载速度快"（没有量化阈值，无法衡量）
 
 每条验收标准必须：
+
 1. 描述一个具体的、可观察的行为
 2. 能用是/否来验证
 3. 包含执行者（用户/系统）和操作动作
@@ -71,10 +84,12 @@
 ## `issues.md` 模板
 
 ```markdown
-# Requirement Issues: {module-name}
+# 需求澄清（issues.md）
 
-## Date: {YYYY-MM-DD}
-## Status: OPEN | PARTIALLY_RESOLVED | RESOLVED
+- 模块名：FundCalculation
+- 模块显示名：基金测算
+- 日期：{YYYY-MM-DD}
+- 状态：OPEN | PARTIALLY_RESOLVED | RESOLVED
 
 ---
 
@@ -98,7 +113,8 @@
 ## 合并规则
 
 对已有模块重新运行需求收集时：
-1. 先读取已有的 `.ai/missions/{module}/reqDocs/req.md`
+
+1. 先读取已有的 `.ai/missions/{missionId}/reqDocs/req.md`
 2. 新需求使用下一个可用的 REQ-ID（不要复用已删除的 ID）
-3. 更新的需求保留原始 REQ-ID，附加 "Updated: {date}" 备注
+3. 更新的需求保留原始 REQ-ID，附加 `Updated: {date}` 备注
 4. 删除的需求标记为 `**Status:** REMOVED`（不要删除该段落）

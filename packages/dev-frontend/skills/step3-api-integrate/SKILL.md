@@ -95,7 +95,7 @@ export const services = {
 优先按以下顺序获取接口文档：
 
 **从配置中读取（推荐）：**
-- 检查 `.ai/missions/{module}/config.json` 中的 `apiDocSources`
+- 检查 `.ai/missions/{missionId}/config.json` 中的 `apiDocSources`
 - 扫描并读取配置路径下的所有相关文档
 
 **从用户指定路径读取：**
@@ -104,7 +104,13 @@ export const services = {
 **从用户输入读取：**
 - 接受直接粘贴的接口说明、Swagger 片段或飞书文档摘录
 
-把整理后的结构化结果写入 `.ai/missions/{module}/apiDoc/api.md`，格式以 `../../references/doc-templates/api-doc-template.md` 为准。
+把整理后的结构化结果写入 `.ai/missions/{missionId}/apiDoc/api.md`，格式以 `../../references/doc-templates/api-doc-template.md` 为准。
+
+定位目标模块时，按以下顺序处理：
+1. 优先使用 `config.json.module.name`
+2. 再校验 `api.md` 顶部 `- 模块名：`
+3. 若 `config.json` 为空但 `api.md` 已明确模块名，应先同步回 `config.json`
+4. 若两者冲突或仍为空，则返回 `NEEDS_CONTEXT`
 
 若缺少以下任一关键信息，不要继续写 `service.ts`：
 - HTTP 方法
@@ -115,7 +121,7 @@ export const services = {
 此时应把缺失项明确记入 `api.md`，并向用户确认后再继续。
 
 **至少执行：**
-- `test -f ".ai/missions/{module}/config.json"`
+- `test -f ".ai/missions/{missionId}/config.json"`
 
 **当接口文档来自文件系统时，至少执行：**
 - `find "{api-source-folder}" -type f | sort`
@@ -221,7 +227,7 @@ const tableData = useCreation(
 ## 第 7 步：校验与收尾
 
 逐项检查：
-- [ ] `.ai/missions/{module}/apiDoc/api.md` 已写入并覆盖本次接口
+- [ ] `.ai/missions/{missionId}/apiDoc/api.md` 已写入并覆盖本次接口
 - [ ] `defs/type.ts`、`defs/service.ts`、`__test__/mock.ts`、`hooks/useData.ts` 彼此一致
 - [ ] `service.ts` 使用模块既有请求封装，或符合模板默认模式
 - [ ] GET/POST/PUT/PATCH 的参数位置正确
@@ -232,7 +238,7 @@ const tableData = useCreation(
 **至少执行：**
 - `rg -n "__MODULE_NAME__|queryExample|example/queryExample" "src/modules/{ModuleName}"`
 - `rg -n "services =|useRequest\\(|useCreation\\(" "src/modules/{ModuleName}"`
-- `test -f ".ai/missions/{module}/apiDoc/api.md"`
+- `test -f ".ai/missions/{missionId}/apiDoc/api.md"`
 
 ## 常用模式
 

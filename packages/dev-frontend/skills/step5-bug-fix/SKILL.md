@@ -12,7 +12,7 @@ description: Use when fixing frontend module bugs that are already registered in
 ## 适用场景
 
 **必须使用：**
-- `.ai/missions/{module}/bugDocs/bug.md` 中已有 `OPEN` 或 `FIXING` 的缺陷
+- `.ai/missions/{missionId}/bugDocs/bug.md` 中已有 `OPEN` 或 `FIXING` 的缺陷
 - 上一轮问题收集已经完成，需要开始逐条修复
 - 同一 Bug 的修复还没收口，需要继续推进 `FIXING`
 - 历史 Bug 修复后需要做定向回归并更新文档状态
@@ -56,9 +56,10 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 ### 第 1 步：LOAD - 读取缺陷范围与上下文
 
 优先读取以下信息：
-- `.ai/missions/{module}/bugDocs/bug.md`：当前缺陷清单、状态、优先级和历史修复信息
-- `.ai/missions/{module}/reqDocs/req.md`：需求和验收标准，确认正确行为
-- `.ai/missions/{module}/apiDoc/api.md`：接口契约、错误码和边界输入
+- `.ai/missions/{missionId}/config.json`：读取 `module.name`、模块根路径和项目上下文
+- `.ai/missions/{missionId}/bugDocs/bug.md`：当前缺陷清单、状态、优先级和历史修复信息
+- `.ai/missions/{missionId}/reqDocs/req.md`：需求和验收标准，确认正确行为
+- `.ai/missions/{missionId}/apiDoc/api.md`：接口契约、错误码和边界输入
 - `src/modules/{ModuleName}/`：实际实现、现有测试代码和依赖链路
 - 开发者补充的上下文：当前 Bug 的复现细节、截图、日志、控制台报错
 
@@ -67,13 +68,15 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - 这些条目是否都已有足够的复现和预期信息
 - 哪些 Bug 共享同一根因，哪些是独立问题
 - 哪些问题已经 `BLOCKED`，当前不应继续硬修
+- 当前模块代码路径是否与 `config.json.module.name`、文档顶部 `模块名` 保持一致
 
 如果当前问题还没进 `bug.md`，不要在第五步顺手建条目；先回到第四步收口。
 
 **至少执行：**
-- `test -d ".ai/missions/{module}"`
-- `test -f ".ai/missions/{module}/bugDocs/bug.md"`
-- `find ".ai/missions/{module}" -maxdepth 3 -type f | sort`
+- `test -d ".ai/missions/{missionId}"`
+- `test -f ".ai/missions/{missionId}/config.json"`
+- `test -f ".ai/missions/{missionId}/bugDocs/bug.md"`
+- `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 - `find "src/modules/{ModuleName}" -maxdepth 4 -type f | sort`
 
 ### 第 2 步：PICK - 锁定本轮修复对象
@@ -140,7 +143,7 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 ### 第 6 步：UPDATE - 同步修复进度
 
 修复或回归完成后，至少同步以下内容：
-- 更新 `.ai/missions/{module}/bugDocs/bug.md`
+- 更新 `.ai/missions/{missionId}/bugDocs/bug.md`
 - 更新目标 `BUG-*` 的 `状态`、`是否关闭`、`根因分析`、`修复方案`、`回归结果`
 - 更新顶部 `当前结论`、`修复进度` 和 `优先处理`
 - 如当前 Bug 已修完，明确剩余未解问题是什么
@@ -156,8 +159,8 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 | `WONT_FIX` | 明确决定不修，并记录理由 |
 
 **至少执行：**
-- `test -f ".ai/missions/{module}/bugDocs/bug.md"`
-- `rg -n "^## BUG-" ".ai/missions/{module}/bugDocs/bug.md"`
+- `test -f ".ai/missions/{missionId}/bugDocs/bug.md"`
+- `rg -n "^## BUG-" ".ai/missions/{missionId}/bugDocs/bug.md"`
 
 ## 速查表
 
@@ -200,5 +203,5 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 ## 集成关系
 
 - **直接上游：** `module-test`
-- **主产物：** 代码修复 + `.ai/missions/{module}/bugDocs/bug.md`
+- **主产物：** 代码修复 + `.ai/missions/{missionId}/bugDocs/bug.md`
 - **如发现新问题：** 回到 `module-test` 先登记，再决定是否继续修复
