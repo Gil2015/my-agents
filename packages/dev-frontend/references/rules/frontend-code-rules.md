@@ -1,6 +1,6 @@
 # 业务侧及工程侧代码规则提示 (Rules)
 
-在进行前端 UI 开发时，必须严格遵守以下代码组织规则和模式。本规则文档是对 `./module-template` 模板的详细补充，涵盖了架构规范、Hook 模式、布局模式等核心约束。
+在进行前端 UI 开发时，必须严格遵守以下代码组织规则和模式。本规则文档是对 `../module-template` 模板的详细补充，涵盖了架构规范、Hook 模式、布局模式等核心约束。
 
 ## 1. 核心架构约束
 
@@ -88,7 +88,7 @@
 
 完成模块开发后，必须对照以下清单进行检查：
 
-- [ ] 所有目录和文件是否匹配模板结构（参考 `./module-template`）？
+- [ ] 所有目录和文件是否匹配模板结构（参考 `../module-template`）？
 - [ ] `index.tsx` 是否仅负责连接 Hook 和布局（无逻辑）？
 - [ ] 是否所有 Hook 都使用了 ahooks（`useSetState`, `useRequest`, `useCreation`, `useMemoizedFn`, `useMount`）？
 - [ ] 布局是否为纯展示组件（无 Hook、无状态）？

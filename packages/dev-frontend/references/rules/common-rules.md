@@ -6,8 +6,8 @@
 
 ## 1. 共享资产位置
 
-- 文档模板统一维护在 `./doc-templates/`
-- 前端模块代码骨架统一维护在 `./module-template/`
+- 文档模板统一维护在 `../doc-templates/`
+- 前端模块代码骨架统一维护在 `../module-template/`
 - Step 私有的指南、补充规则和分析方法，继续放在各自的 `skills/*/references/` 下
 
 ## 2. Mission 工作区约定
@@ -57,9 +57,11 @@
 
 | 主题 | 文件 |
 |------|------|
-| 通用规则 | `./rules.md` |
-| 需求文档模板 | `./doc-templates/req-doc-template.md` |
-| 接口文档模板 | `./doc-templates/api-doc-template.md` |
-| 缺陷文档模板 | `./doc-templates/bug-doc-template.md` |
+| 通用规则 | `./common-rules.md` |
+| 需求文档模板 | `../doc-templates/req-doc-template.md` |
+| 接口文档模板 | `../doc-templates/api-doc-template.md` |
+| 缺陷文档模板 | `../doc-templates/bug-doc-template.md` |
 | 前端代码规则 | `./frontend-code-rules.md` |
-| 模块代码骨架 | `./module-template/` |
+| Step4 缺陷文档规则 | `./step4-bug-doc-rules.md` |
+| Step5 缺陷文档规则 | `./step5-bug-doc-rules.md` |
+| 模块代码骨架 | `../module-template/` |

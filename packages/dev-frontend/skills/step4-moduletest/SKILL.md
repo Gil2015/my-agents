@@ -268,10 +268,10 @@ digraph process {
 
 | 主题 | 文件 |
 |------|------|
-| 通用规则 | `../../references/rules.md` |
+| 通用规则 | `../../references/rules/common-rules.md` |
 | 缺陷文档模板 | `../../references/doc-templates/bug-doc-template.md` |
 | 问题发现与审查指南 | `references/bug-discovery-guide.md` |
-| 缺陷文档填写规则 | `references/bug-doc-rules.md` |
+| 缺陷文档填写规则 | `../../references/rules/step4-bug-doc-rules.md` |
 
 ## 集成关系
 

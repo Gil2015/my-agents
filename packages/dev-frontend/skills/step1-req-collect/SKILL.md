@@ -160,7 +160,7 @@ digraph process {
 
 | 主题 | 文件 |
 |------|------|
-| 通用规则 | `../../references/rules.md` |
+| 通用规则 | `../../references/rules/common-rules.md` |
 | 需求文档模板 | `../../references/doc-templates/req-doc-template.md` |
 
 ## 集成关系

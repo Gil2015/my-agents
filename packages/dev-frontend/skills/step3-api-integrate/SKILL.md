@@ -260,10 +260,10 @@ const tableData = useCreation(
 
 | 主题 | 文件 |
 |------|------|
-| 通用规则 | `../../references/rules.md` |
+| 通用规则 | `../../references/rules/common-rules.md` |
 | 接口文档模板 | `../../references/doc-templates/api-doc-template.md` |
 | 共享模块模板 | `../../references/module-template/` |
-| 业务侧与工程侧代码规则 | `../../references/frontend-code-rules.md` |
+| 业务侧与工程侧代码规则 | `../../references/rules/frontend-code-rules.md` |
 
 ## 集成关系
 

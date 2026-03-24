@@ -202,9 +202,9 @@ digraph process {
 
 | 主题 | 文件 |
 |------|------|
-| 通用规则 | `../../references/rules.md` |
+| 通用规则 | `../../references/rules/common-rules.md` |
 | 缺陷文档模板 | `../../references/doc-templates/bug-doc-template.md` |
-| 缺陷文档填写规则 | `references/bug-doc-rules.md` |
+| 缺陷文档填写规则 | `../../references/rules/step5-bug-doc-rules.md` |
 | 缺陷分析指南 | `references/bug-triage-guide.md` |
 
 ## 集成关系

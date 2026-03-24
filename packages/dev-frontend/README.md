@@ -18,9 +18,8 @@ packages/dev-frontend/
 ├── CLAUDE.md
 ├── references/
 │   ├── doc-templates/
-│   ├── frontend-code-rules.md
 │   ├── module-template/
-│   └── rules.md
+│   └── rules/
 └── skills/
     ├── step1-req-collect/
     ├── step2-ui-dev/
@@ -34,7 +33,7 @@ packages/dev-frontend/
 说明：
 - 当前标准流程为：`step1-req-collect` → `step2-ui-dev` → `step3-api-integrate` → `step4-moduletest` → `step5-bug-fix`。
 - 文档模板统一维护在 `references/doc-templates/`；step 私有指南仍放在各自 skill 的 `references/` 下。
-- `references/rules.md` 负责通用规则，前端代码与 ahooks 约束独立放在 `references/frontend-code-rules.md`。
+- 所有规则类文件统一维护在 `references/rules/`，包括通用规则、前端代码规则，以及 step4 / step5 的缺陷文档规则。
 
 ## Mission 目录规范
 
