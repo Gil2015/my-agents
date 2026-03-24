@@ -104,7 +104,7 @@ export const services = {
 **从用户输入读取：**
 - 接受直接粘贴的接口说明、Swagger 片段或飞书文档摘录
 
-把整理后的结构化结果写入 `.ai/missions/{module}/apiDoc/api.md`，格式以 `../../references/api-doc-template.md` 为准。
+把整理后的结构化结果写入 `.ai/missions/{module}/apiDoc/api.md`，格式以 `../../references/doc-templates/api-doc-template.md` 为准。
 
 若缺少以下任一关键信息，不要继续写 `service.ts`：
 - HTTP 方法
@@ -260,9 +260,10 @@ const tableData = useCreation(
 
 | 主题 | 文件 |
 |------|------|
-| 接口文档模板 | `../../references/api-doc-template.md` |
+| 通用规则 | `../../references/rules.md` |
+| 接口文档模板 | `../../references/doc-templates/api-doc-template.md` |
 | 共享模块模板 | `../../references/module-template/` |
-| 业务侧与工程侧代码规则 | `../../references/rules.md` |
+| 业务侧与工程侧代码规则 | `../../references/frontend-code-rules.md` |
 
 ## 集成关系
 

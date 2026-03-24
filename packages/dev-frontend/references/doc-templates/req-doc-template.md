@@ -1,8 +1,8 @@
-# 结构化需求文档格式
+# 需求文档模板（req.md / issues.md）
 
-`.ai/missions/{module}/reqDocs/req.md` 的模板。
+适用于 step1 `req-collect` 产出的 `.ai/missions/{module}/reqDocs/req.md` 和 `.ai/missions/{module}/reqDocs/issues.md`。
 
-## 完整模板
+## `req.md` 模板
 
 ```markdown
 # Module: {module-name}
@@ -18,7 +18,7 @@
 - **Source Files:** {来源文件路径，使用相对 `{source-folder}` 的路径；多文件用逗号分隔}
 - **Source Notes (optional):** {关键段落、标题或上下文摘要，便于追溯}
 - **Acceptance Criteria:**
-  - [ ] AC-001: {可测试的条件 — 必须能用是/否来验证}
+  - [ ] AC-001: {可测试的条件 - 必须能用是/否来验证}
   - [ ] AC-002: {可测试的条件}
   - [ ] AC-003: {可测试的条件}
 - **UI Reference:** {该需求涉及哪个页面/界面/组件}
@@ -45,10 +45,10 @@
 
 | 优先级 | 含义 | 示例 |
 |--------|------|------|
-| P0 | 必须有 — 阻塞发布 | 核心增删改查功能 |
-| P1 | 应该有 — 重要但不阻塞 | 搜索/筛选功能 |
-| P2 | 锦上添花 — 提升用户体验 | 键盘快捷键、动画效果 |
-| P3 | 未来考虑 — 不在当前版本范围内 | 高级数据分析 |
+| P0 | 必须有 - 阻塞发布 | 核心增删改查功能 |
+| P1 | 应该有 - 重要但不阻塞 | 搜索/筛选功能 |
+| P2 | 锦上添花 - 提升用户体验 | 键盘快捷键、动画效果 |
+| P3 | 未来考虑 - 不在当前版本范围内 | 高级数据分析 |
 
 ## 验收标准编写规则
 
@@ -68,9 +68,7 @@
 3. 包含执行者（用户/系统）和操作动作
 4. 明确预期结果
 
-## 问题文档格式
-
-`.ai/missions/{module}/reqDocs/issues.md` 的模板：
+## `issues.md` 模板
 
 ```markdown
 # Requirement Issues: {module-name}

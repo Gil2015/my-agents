@@ -133,7 +133,7 @@ digraph process {
 
 ### 第 4 步：DRAFT - 维护缺陷文档
 
-以 `../../references/bug-doc-template.md` 为模板基线，生成或更新 `.ai/missions/{module}/bugDocs/bug.md`。
+以 `../../references/doc-templates/bug-doc-template.md` 为模板基线，生成或更新 `.ai/missions/{module}/bugDocs/bug.md`。
 
 维护规则：
 - 已有缺陷保留原 `BUG-*` 编号，不要改号或重排
@@ -268,7 +268,8 @@ digraph process {
 
 | 主题 | 文件 |
 |------|------|
-| 缺陷文档模板 | `../../references/bug-doc-template.md` |
+| 通用规则 | `../../references/rules.md` |
+| 缺陷文档模板 | `../../references/doc-templates/bug-doc-template.md` |
 | 问题发现与审查指南 | `references/bug-discovery-guide.md` |
 | 缺陷文档填写规则 | `references/bug-doc-rules.md` |
 

@@ -16,16 +16,25 @@
 packages/dev-frontend/
 ├── README.md
 ├── CLAUDE.md
+├── references/
+│   ├── doc-templates/
+│   ├── frontend-code-rules.md
+│   ├── module-template/
+│   └── rules.md
 └── skills/
     ├── step1-req-collect/
     ├── step2-ui-dev/
     ├── step3-api-integrate/
     ├── step4-moduletest/
+    │   └── references/
     └── step5-bug-fix/
+        └── references/
 ```
 
 说明：
 - 当前标准流程为：`step1-req-collect` → `step2-ui-dev` → `step3-api-integrate` → `step4-moduletest` → `step5-bug-fix`。
+- 文档模板统一维护在 `references/doc-templates/`；step 私有指南仍放在各自 skill 的 `references/` 下。
+- `references/rules.md` 负责通用规则，前端代码与 ahooks 约束独立放在 `references/frontend-code-rules.md`。
 
 ## Mission 目录规范
 
@@ -47,6 +56,7 @@ packages/dev-frontend/
 `missionId` 命名规则：`YYYYMMDD-HHmmss`，例如 `20260322-081530`。
 
 说明：
+- 技能文档中通常使用 `{module}` 作为当前 mission 目录占位符，本 README 中的 `{missionId}` 表示真实目录名，两者在示例层面指向同一层级。
 - `bugDocs/bug.md` 是当前 step4 / step5 标准流程的核心交付物。
 - `testDocs/` 不再是当前 step4 的固定产物；若项目单独维护测试文档，可按需扩展。
 

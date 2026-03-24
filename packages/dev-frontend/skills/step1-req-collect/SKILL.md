@@ -93,7 +93,7 @@ digraph process {
 
 ### 第 2 步：解析
 
-将原始内容转换为结构化需求格式（参见 `references/requirement-format.md`）。
+将原始内容转换为结构化需求格式（参见 `../../references/doc-templates/req-doc-template.md`）。
 
 针对每条需求：
 - 分配顺序编号：REQ-001、REQ-002……
@@ -125,8 +125,8 @@ digraph process {
 
 将两个文件写入 `.ai/missions/{module}/reqDocs/`：
 
-1. **`req.md`** — 所有结构化需求（格式参见 references）
-2. **`issues.md`** — 所有标记的待澄清问题（仅在存在不清晰项时生成）
+1. **`req.md`** — 所有结构化需求（格式参见 `../../references/doc-templates/req-doc-template.md`）
+2. **`issues.md`** — 所有标记的待澄清问题（模板同样参见 `../../references/doc-templates/req-doc-template.md`，仅在存在不清晰项时生成）
 
 ## 速查表
 
@@ -160,7 +160,8 @@ digraph process {
 
 | 主题 | 文件 |
 |------|------|
-| 结构化需求格式 | `references/requirement-format.md` |
+| 通用规则 | `../../references/rules.md` |
+| 需求文档模板 | `../../references/doc-templates/req-doc-template.md` |
 
 ## 集成关系
 

@@ -38,7 +38,7 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 **没有例外：**
 - `hooks/useWatcher.ts` 没有副作用也要保留空文件
 - `layouts/` 只做展示，不直接发请求，不直接写业务逻辑
-- `useState`、`useCallback`、`useMemo` 不作为默认方案；优先按 `../../references/rules.md` 使用 ahooks 对应模式
+- `useState`、`useCallback`、`useMemo` 不作为默认方案；优先按 `../../references/frontend-code-rules.md` 使用 ahooks 对应模式
 - 类型先落地，再填实现；禁止一路 `any` 写到底
 
 ## 违反后果
@@ -66,7 +66,7 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 
 以以下基线为准：
 - `../../references/module-template/`
-- `../../references/rules.md`
+- `../../references/frontend-code-rules.md`
 
 目标结构至少包含：
 
@@ -136,7 +136,7 @@ src/modules/{ModuleName}/
 - `useController` 通过参数接收 `data`，不跨层直接拿状态
 - `useWatcher` 只处理监听和初始化，不把主要请求逻辑塞进去
 - `hooks/index.ts` 最终返回 `data` 和 `controllers`
-- 默认遵循 `../../references/rules.md` 的 ahooks 映射；如果模板示例仍保留旧写法，以 `rules.md` 为准
+- 默认遵循 `../../references/frontend-code-rules.md` 的 ahooks 映射；如果模板示例仍保留旧写法，以 `frontend-code-rules.md` 为准
 
 ## 第 5 步：实现布局与组件
 
@@ -201,8 +201,9 @@ src/modules/{ModuleName}/
 
 | 主题 | 文件 |
 |------|------|
+| 通用规则 | `../../references/rules.md` |
 | 共享模块模板 | `../../references/module-template/` |
-| 业务侧与工程侧代码规则 | `../../references/rules.md` |
+| 业务侧与工程侧代码规则 | `../../references/frontend-code-rules.md` |
 
 ## 集成关系
 

@@ -1,6 +1,6 @@
 # 缺陷文档填写规则
 
-`.ai/missions/{module}/bugDocs/bug.md` 在问题收集阶段的填写与更新规则。主模板以 `../../references/bug-doc-template.md` 为准，本文件补充收口阶段的字段约束和进度摘要规则。
+`.ai/missions/{module}/bugDocs/bug.md` 在问题收集阶段的填写与更新规则。主模板以 `../../../references/doc-templates/bug-doc-template.md` 为准，本文件补充收口阶段的字段约束和进度摘要规则。
 
 ## 顶部摘要填写规则
 
