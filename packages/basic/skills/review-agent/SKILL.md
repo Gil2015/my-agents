@@ -1,9 +1,9 @@
 ---
 name: review-agent
-description: "Reviews Agent/SubAgent definitions for structural completeness and prompt quality. Use when reviewing AGENTS.md files, SubAgent prompts, or evaluating orchestration design."
+description: "当需要审查 Agent / SubAgent 定义的结构完整性和提示词质量时使用，适用于检查 AGENTS.md、SubAgent prompt 以及整体编排设计。"
 ---
 
-# Review Agent
+# 审查 Agent
 
 审查 Agent（协调者）和 SubAgent（子智能体）定义文件的结构完整性和质量。
 
@@ -12,6 +12,12 @@ description: "Reviews Agent/SubAgent definitions for structural completeness and
 本技能帮助你审查 AGENTS.md 和 SubAgent 提示词是否符合最佳实践。重点检查：结构完整性、职责边界、返回状态协议、质量关卡设计。
 
 一个写得好的 Agent 系统能让多阶段任务可靠执行；写得差的则会导致子智能体迷失方向、上下文丢失、错误状态下继续执行。
+
+## 语言约定
+
+- 先遵循目标仓库自己的语言规范。
+- 如果没有更细规则，则在 `@gai/basic` 包内默认遵循这条约定：除 `name`、关键代码、命令、路径、字段名、协议字面量和理论上必须英文的地方外，其余部分尽量中文。
+- 审查时不要仅仅为了统一格式，就把原本清晰的中文 `description` 或正文改成英文。
 
 ## 适用场景
 
@@ -69,7 +75,7 @@ description: "Reviews Agent/SubAgent definitions for structural completeness and
 按以下格式输出：
 
 ```markdown
-## Agent Review: {agent-name}
+## Agent 审查结果：{agent-name}
 
 ### AGENTS.md 结构: PASS / FAIL
 {缺少的章节或问题}
@@ -123,6 +129,7 @@ description: "Reviews Agent/SubAgent definitions for structural completeness and
 | 质量关卡是主观判断 | 无法自动验证，形同虚设 | 改为可检查的客观条件（文件存在、字段完整） |
 | 只有 DONE 和 BLOCKED 两种状态 | 协调器无法做精细决策 | 补全四种标准状态 |
 | SubAgent 的输出格式未定义 | 下游无法解析 | 给出精确的输出模板 |
+| 只因为“看起来更统一”就把中文 `description` 改成英文 | 偏离仓库实际语言规范 | 优先遵循目标仓库规范；`@gai/basic` 默认除必须英文内容外尽量中文 |
 
 ## 参考文档
 

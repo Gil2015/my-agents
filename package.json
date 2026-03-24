@@ -1,5 +1,5 @@
 {
-  "name": "my-agents",
+  "name": "gai",
   "private": true,
   "workspaces": [
     "packages/*"

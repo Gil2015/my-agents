@@ -1,6 +1,6 @@
 ---
 name: module-test
-description: Use when collecting, auditing, and documenting frontend module bugs into bugDocs/bug.md before any bug fixing starts
+description: 当需要在开始修 bug 之前，收集、审查并把前端模块问题登记到 bugDocs/bug.md 时使用
 ---
 
 # 模块问题收集

@@ -1,6 +1,6 @@
 ---
 name: bug-fix
-description: Use when fixing frontend module bugs that are already registered in bugDocs/bug.md and updating repair progress
+description: 当需要修复已经登记在 bugDocs/bug.md 中的前端模块问题，并同步更新修复进度时使用
 ---
 
 # 缺陷修复

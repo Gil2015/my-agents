@@ -1,6 +1,6 @@
 ---
 name: api-integrate
-description: Use when turning backend API docs into typed service, mock, and hook updates for an existing frontend module
+description: 当需要把后端 API 文档转成现有前端模块的 typed service、mock 和 hook 更新时使用
 ---
 
 # 接口联调

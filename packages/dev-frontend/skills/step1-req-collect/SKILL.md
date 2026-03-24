@@ -1,6 +1,6 @@
 ---
 name: req-collect
-description: Use when collecting and organizing requirements from files in a specified folder, before starting UI development
+description: 当需要在开始 UI 开发前，从指定文件夹中收集并整理需求资料时使用
 ---
 
 # 需求收集

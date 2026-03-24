@@ -1,6 +1,6 @@
 ---
 name: ui-dev
-description: Use when creating or extending a frontend module from requirements, UI designs, or direct implementation instructions, following the shared module template
+description: 当需要基于需求文档、UI 设计稿或直接实现指令，按共享模块模板创建或扩展前端模块时使用
 ---
 
 # UI 开发

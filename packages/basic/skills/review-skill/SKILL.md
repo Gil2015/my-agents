@@ -1,6 +1,6 @@
 ---
 name: review-skill
-description: "Use when reviewing, auditing, or improving an existing Claude Code skill. Actions: review skill quality, suggest fixes, rewrite skill after confirmation."
+description: "当需要审查、审计或优化已有 Claude Code skill 时使用。负责检查 skill 质量、给出修复建议，并在确认后重写 SKILL.md。"
 argument-hint: "[path-to-skill]"
 ---
 
@@ -57,6 +57,12 @@ digraph review {
 
 读取 `references/checklist.md` 获取完整检查清单，对每一项评分为 PASS / WARN / FAIL。
 
+先读取目标包或仓库自己的规范文件；如果没有更具体的约定，则在 `@gai/basic` 包内默认遵循这条语言规则：
+
+- `name`、代码、命令、路径、字段名、协议字面量等保持英文。
+- 其余说明文字和 `description` 尽量中文。
+- 不要仅仅因为追求格式统一，就把原本清晰的中文 `description` 改成英文。
+
 检查清单包含五大类：
 
 | 类别 | 编号 | 关注点 |
@@ -98,6 +104,8 @@ digraph review {
 - 修复明确无争议的 WARN 项
 - 保留作者的意图、风格和领域内容
 - 不添加作者未计划的内容，不改变技能类型
+- 遵循目标仓库的语言规范；若无更细规则，则按 `@gai/basic` 约定，除 `name` 和必须英文内容外尽量中文
+- 不因语言偏好而随意改写术语、协议字面量或已有可用的中文 `description`
 - 对非显而易见的修改添加行内注释 `<!-- REVIEW: 修改原因 -->`
 
 ### 步骤 4：覆写 — 确认后执行
@@ -120,6 +128,7 @@ digraph review {
 | 错误 | 正确做法 |
 |------|---------|
 | 改写作者的语气/风格而非修复问题 | 只修复结构和质量问题 |
+| 为了“看起来统一”就把中文 `description` 改成英文 | 先看仓库规范；`@gai/basic` 默认除必须英文内容外尽量中文 |
 | 添加作者未计划的功能 | 保留原始范围 |
 | 忽略类型专项检查 | 务必先识别技能类型 |
 | 建议精简字数但不给出具体删减方案 | 提供实际精简后的文本 |

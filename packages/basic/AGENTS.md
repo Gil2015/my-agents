@@ -30,24 +30,24 @@ basic/
 
 ## SKILL.md 规范
 
-### Frontmatter（必须英文）
+### Frontmatter（`name` 必须英文）
 
 ```yaml
 ---
 name: skill-name          # 小写连字符，与目录名一致
-description: "做什么的简要概述. Use when [具体触发场景]"
+description: "当需要[具体触发场景]时使用，用一句话说明这个 skill 做什么"
 ---
 ```
 
 - `name` 只允许字母、数字、连字符
-- `description` 第三人称，清晰描述"做什么 + 何时使用"（功能概要 + 触发条件）
-- frontmatter 总字符数不超过 1024，文案尽可能用中文（代码、关键术语等除外）
+- `description` 清晰描述"做什么 + 何时使用"（功能概要 + 触发条件），可以用中文
+- frontmatter 总字符数不超过 1024；除 `name`、代码、命令、路径、字段名、协议字面量和理论上必须英文的内容外，其余文案尽量中文
 - 可选字段：`argument-hint`（需双引号包裹）、`allowed-tools`、`context`、`disable-model-invocation` 等，按需添加
 
 ### 正文
 
-- 通用技能用英文编写（面向多团队复用）
-- 如果技能只面向中文团队，可以用中文，但 frontmatter 仍保持英文
+- 除 `name`、关键代码和理论上必须英文的地方外，其余说明默认尽量中文
+- 如果技能明确面向跨团队英文环境或外部公开复用，可以按需使用英文或双语，但全文要保持一致
 - 参考文档（`references/`）超过 100 行时从 SKILL.md 中拆出
 
 ## 写作风格
@@ -60,5 +60,5 @@ description: "做什么的简要概述. Use when [具体触发场景]"
 
 - 改动 SKILL.md 正文前，先通读全文理解上下文
 - 不要改 frontmatter 的 `name`（会影响技能发现和路由）
-- 修改 `description` 时确保仍包含"做什么 + 何时使用"
+- 修改 `description` 时确保仍包含"做什么 + 何时使用"，不要仅仅为了统一格式就把中文硬改成英文
 - 添加 `references/` 文件后，在 SKILL.md 末尾的 References 表中注册
