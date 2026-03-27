@@ -6,14 +6,17 @@
 
 你的目标不是默认跑完整个 `step1 -> step5`，而是用最短正确路径完成当前这轮开发任务。
 
+`design-context-build` 是独立可选能力：它不属于默认主链路，但在用户明确要求“按项目设计规范 / 主题开发”、或现有 UI 开发容易脱离项目设计系统时，可以先于 `step2-ui-dev` 单独执行。
+
 ## 工作流程
 
 1. 读取用户目标、当前仓库路径、`missionId` 或 `missionRoot`，确认这轮任务是新建功能、继续开发、接口联调、问题收集、缺陷修复，还是跨阶段恢复。
 2. 检查 mission 是否存在；如果用户要启动新任务且 `config.json` 还不存在，先执行 `scripts/create-mission.sh` 初始化 mission，再继续路由。
-3. 调用 `route-planner`，根据用户意图、mission 目录现状和模块代码状态，给出最小必要的 skill 序列。
-4. 按路由结果串行执行 skill；调用时统一使用 skill 的绝对路径，不使用快捷别名。
-5. 每完成一个 step，立即调用 `handoff-gate` 校验交接条件，判断是继续到下一步、停在当前阶段，还是回退到更早阶段补上下文。
-6. 向用户汇报当前完成阶段、产物路径、未解决问题和建议的下一步；如果当前轮目标已完成，则停止，不额外延长链路。
+3. 若用户明确要求先整理项目设计规范、主题 token 或组件复用约束，可先调用 `design-context-build`；否则继续主链路路由。
+4. 调用 `route-planner`，根据用户意图、mission 目录现状和模块代码状态，给出最小必要的 skill 序列。
+5. 按路由结果串行执行 skill；调用时统一使用 skill 的绝对路径，不使用快捷别名。
+6. 每完成一个 step，立即调用 `handoff-gate` 校验交接条件，判断是继续到下一步、停在当前阶段，还是回退到更早阶段补上下文。
+7. 向用户汇报当前完成阶段、产物路径、未解决问题和建议的下一步；如果当前轮目标已完成，则停止，不额外延长链路。
 
 ## Skill 路由表
 
@@ -25,6 +28,12 @@
 | `module-test` | `{devFrontendRoot}/skills/step4-moduletest/SKILL.md` | 需要收集问题、整理 bug 清单或做需求对码审查；是否进入修复由本轮目标和 handoff-gate 决定 |
 | `bug-fix` | `{devFrontendRoot}/skills/step5-bug-fix/SKILL.md` | `bugDocs/bug.md` 中已有 `BUG-*`，需要继续修复、回归并同步进度 |
 
+## 独立补充 Skill
+
+| Skill | 路径 | 何时建议触发 |
+|------|------|-------------|
+| `design-context-build` | `{devFrontendRoot}/skills/design-context-build/SKILL.md` | 用户明确要求按项目设计规范/主题开发，或在进入 `ui-dev` 前需要先沉淀主题 token、组件复用约束和样式规则 |
+
 ## 子智能体表
 
 | 名称 | 阶段 | 文件路径 | 职责 |
@@ -35,6 +44,8 @@
 ## 协调规则
 
 - 默认只执行满足当前目标所需的最短链路，不自动补跑未被请求的后续阶段。
+- `design-context-build` 不属于默认 `step1 -> step5` 主链路；只有用户明确需要，或 UI 风格一致性已经成为当前阻塞时才建议执行。
+- 没有 `design-context.md` 不阻塞 `step2-ui-dev`，但一旦文档存在，`step2-ui-dev` 必须把它当成实现约束而不是可忽略参考。
 - 如果用户明确说“先做到 1~3”“这轮只做 step2”“下次再做 4/5”，严格按这个范围路由；只有在前置条件缺失时才允许回退到更早阶段。
 - `step1` 不是必经阶段。只要已有明确需求输入，且 `config.json.module.name` 或 `req.md` 顶部 `模块名` 可以唯一定位模块，就允许直接从 `step2` 开始。
 - `step3` 不能在模块骨架缺失时启动；如果用户直接要联调，但模块还没落地，先回到 `step2`。
@@ -64,6 +75,7 @@
 | 关卡 | 通过条件 | 不通过时动作 |
 |------|---------|------------|
 | `INIT` | `{missionRoot}/config.json` 存在，或已成功初始化 mission | 若是新任务则先初始化；若是恢复旧任务但 mission 不明确，则返回 `NEEDS_CONTEXT` |
+| `DESIGN_TO_STEP2` | 用户本轮明确要求设计上下文时，项目级或 mission 级 `design-context.md` 至少存在一份，且可说明当前主题 / token / 组件复用约束 | 先补 `design-context-build` 产物，或在用户接受缺口后直接从 `step2` 收口说明 |
 | `STEP1_TO_STEP2` | `reqDocs/req.md` 存在，且模块名可由 `config.json.module.name` 或 `req.md` 顶部信息唯一定位 | 回到 `req-collect` 继续补齐需求或模块信息 |
 | `STEP2_TO_STEP3` | 目标模块目录存在，且至少具备 `index.tsx`、`defs/`、`hooks/`、`layouts/` 基础骨架 | 先补 `ui-dev` 结构，不进入 `api-integrate` |
 | `STEP3_TO_STEP4` | 本轮目标包含问题收集或缺陷链路，且模块代码和必要文档可用于审查 | 若用户只要求开发到联调完成，则在 `step3` 收口 |

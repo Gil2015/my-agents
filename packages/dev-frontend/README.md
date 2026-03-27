@@ -5,7 +5,7 @@
 ## 核心原则
 
 - `missionId` 只表示任务工作区；`moduleName` 才表示真实业务模块目录名
-- 初始化只创建 `.ai/missions/{missionId}/config.json`；`reqDocs/`、`apiDoc/`、`bugDocs/` 在对应 step 第一次执行时按需生成
+- 初始化只创建 `.ai/missions/{missionId}/config.json`；`design/`、`reqDocs/`、`apiDoc/`、`bugDocs/` 在对应 skill / step 第一次执行时按需生成
 - 目标模块路径统一按 `projectRoot/moduleRoot/{moduleName}` 解析
 - 仅支持完整路径调用，不使用快捷命令
 - 每个 mission 独立 `config.json`，不依赖包级全局配置
@@ -29,6 +29,7 @@ packages/dev-frontend/
 ├── scripts/
 │   └── create-mission.sh
 └── skills/
+    ├── design-context-build/      # 独立设计上下文整理 skill
     ├── step1-req-collect/
     ├── step2-ui-dev/
     ├── step3-api-integrate/
@@ -40,6 +41,7 @@ packages/dev-frontend/
 
 说明：
 - 标准流程为：`step1-req-collect` → `step2-ui-dev` → `step3-api-integrate` → `step4-moduletest` → `step5-bug-fix`，但真实开发中允许按需跳步和断点续跑。
+- `design-context-build` 是独立可选 skill，不进入 `step1 -> step5` 的默认排序；存在设计上下文需求时，可在 `step2-ui-dev` 前单独运行。
 - `agents/fe-dev-orchestrator/` 用于根据当前 mission 状态自动选择最小必要步骤。
 - 目录名带 `stepX-` 前缀用于流程排序；对应 skill 名分别是 `req-collect`、`ui-dev`、`api-integrate`、`module-test`、`bug-fix`。
 - `references/doc-templates/`、`references/rules/`、`references/module-template/` 分别维护共享文档模板、规则和模块结构基线。
@@ -60,6 +62,7 @@ packages/dev-frontend/
 ```text
 .ai/missions/{missionId}/
 ├── config.json
+├── design/       # design-context-build 按需生成 mission 级设计覆盖
 ├── reqDocs/      # step1 首次生成
 ├── apiDoc/       # step3 首次生成
 ├── bugDocs/      # step4 / step5 首次生成
@@ -69,6 +72,7 @@ packages/dev-frontend/
 说明：
 - skill 文档中的 mission 路径统一写作 `.ai/missions/{missionId}/...`；代码模块目录统一写作 `{ModuleName}` 或 `moduleName`。
 - `bugDocs/bug.md` 是 step4 / step5 的核心交付物；`testDocs/` 不再是 step4 固定产物。
+- 项目级共享设计上下文默认写入 `{projectRoot}/.ai/design/design-context.md`；mission 级差异写入 `.ai/missions/{missionId}/design/design-context.md`。
 
 ## Mission 配置说明
 
@@ -115,7 +119,29 @@ packages/dev-frontend/
 sh .ai/dev-frontend/scripts/create-mission.sh
 ```
 
-### 2) 使用协调 Agent 决定本轮步骤
+### 2) 可选：先生成设计上下文文档
+
+当目标项目已有主题体系、组件库封装或设计规范，但 AI 经常在 `step2-ui-dev` 里另写一套样式时，建议先运行：
+
+```text
+/abs/path/to/project/.ai/dev-frontend/skills/design-context-build/SKILL.md
+```
+
+该 skill 会从以下来源整理 `design-context.md`：
+
+- 项目代码中的主题实现、`ConfigProvider` / 自定义 Provider、CSS Variables、公共组件封装
+- 开发者手填的设计规范说明
+- 指定资源目录中的设计规范文件、截图或标注稿
+- 当前轮用户口述的设计要求
+
+默认产物：
+
+- 项目级基线：`/abs/path/to/project/.ai/design/design-context.md`
+- mission 级覆盖：`/abs/path/to/project/.ai/missions/{missionId}/design/design-context.md`
+
+`step2-ui-dev` 会优先读取 mission 级覆盖，再读取项目级基线；如果两者都不存在，仍可继续开发，但需要显式说明设计上下文缺口。
+
+### 3) 使用协调 Agent 决定本轮步骤
 
 协调 Agent 路径：
 
@@ -130,7 +156,7 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 - 当前项目根目录或仓库根目录
 - 当前 mission 路径，或至少给出 `missionId`
 - 这轮明确目标，例如“先做到接口联调”“只整理 bug 不修”“继续修历史 BUG”
-- 当前额外上下文，例如需求文档目录、UI 稿目录、API 文档目录、bug 来源目录
+- 当前额外上下文，例如设计规范目录、需求文档目录、UI 稿目录、API 文档目录、bug 来源目录
 - 如果你只想跑某一段，明确写出范围，例如“只做 step2”“先做 step1~3”
 
 常见路由示例：
@@ -138,6 +164,7 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 | 当前目标 | 常见路由 |
 |---------|---------|
 | 新需求从整理到基础联调 | `step1 -> step2 -> step3` |
+| 先沉淀项目设计规范，再开发页面 | `design-context-build -> step2` |
 | 已有明确需求，直接开始做页面 | `step2`，必要时回退 `step1` |
 | 模块已开发好，只补接口联调 | `step3` |
 | 联调后统一收集问题，再安排修复 | `step4 -> step5` |
@@ -170,17 +197,27 @@ mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
 
 ## 阶段输入输出
 
+- `design-context-build`（独立补充 skill）
+  - 输入：可选 `mission` 路径 + 项目代码 + 设计资源目录 + 开发者补充说明 + 当前轮文字描述
+  - 输出：项目级 `.ai/design/design-context.md`，以及按需生成的 mission 级 `design/design-context.md`
+  - 规则：不进入主线 step 排序；有文档时 `step2-ui-dev` 必须优先消费，没有文档时不阻塞其他 step
+
 - `step1-req-collect`
   - 输入：mission 路径 + 当前轮需求材料或 `reqDocs/` 原始材料；已有 `req.md` 时按增量规则更新
   - 输出：结构化 `reqDocs/req.md`、按需生成 `reqDocs/issues.md`，并在可确定时回写 `config.json.module`
   - 返回：仍存在 `[OPEN]` 澄清项，或 `module.name` 仍未确定时，使用 `DONE_WITH_CONCERNS`
 - `step2-ui-dev`
-  - 输入：`reqDocs/req.md` + `config.json` + 可用 UI 上下文
+  - 输入：`reqDocs/req.md` + `config.json` + 可用设计上下文 + 可用 UI 上下文
   - 输出：模块代码（`projectRoot/moduleRoot/{moduleName}`）
+  - 设计上下文优先级：
+    - `design/design-context.md`
+    - `{projectRoot}/.ai/design/design-context.md`
+    - 若均不存在，则显式说明缺口后继续按通用实现落地
   - UI 上下文优先级：
     - orchestrator / 标准链路：`ui/component-mapping.md` -> `ui/` 原始素材 -> `reqDocs/req.md` 中已结构化的页面/交互描述
     - 直接调用 `step2-ui-dev` skill：`ui/component-mapping.md` -> `ui/` 原始素材 -> 当前轮文字描述 -> `reqDocs/req.md` 中已结构化的页面/交互描述
   - 规则：目标模块路径优先从 `config.json.module.name` 解析；若为空，则回退到 `reqDocs/req.md` 顶部 `模块名`；两者冲突或仍为空时返回 `NEEDS_CONTEXT`
+  - 设计约束：如存在 `design-context.md`，必须优先复用其中定义的主题接入方式、token 与组件优先级，不得静默新写一套视觉体系
   - 最小产物：模块入口、基础类型、必要 hooks、至少一个布局入口与作用域样式文件；`defs/service.ts` 仅允许保留 `step3-api-integrate` 可继续接手的占位实现
 - `step3-api-integrate`
   - 输入：`apiDoc/api.md` + 目标模块代码 + `config.json`

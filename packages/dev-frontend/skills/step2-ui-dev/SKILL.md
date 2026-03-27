@@ -1,15 +1,15 @@
 ---
 name: ui-dev
-description: 当需要基于需求文档、UI 设计稿或直接实现指令，按共享模块模板创建或扩展前端模块时使用
+description: 当需要基于需求文档、设计上下文、UI 设计稿或直接实现指令，按共享模块模板创建或扩展前端模块时使用
 ---
 
 # UI 开发
 
 ## 概述
 
-根据需求文档、UI 图或明确的口头描述，在现有业务模块内开发页面与交互，或按共享模板搭建新模块。输出必须能直接进入 `api-integrate` 和后续 `module-test`，而不是只交付一个“先能跑起来”的页面。
+根据需求文档、设计上下文、UI 图或明确的口头描述，在现有业务模块内开发页面与交互，或按共享模板搭建新模块。输出必须能直接进入 `api-integrate` 和后续 `module-test`，而不是只交付一个“先能跑起来”的页面。
 
-**核心原则：** 先对齐模板和职责边界，再写具体 UI。结构错了，后面的联调、审计和测试都会变慢。
+**核心原则：** 先对齐设计上下文、模板和职责边界，再写具体 UI。结构错了，后面的联调、审计和测试都会变慢。
 
 **违反规则的字面意思就是违反规则的精神。**
 
@@ -49,15 +49,32 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 
 读取以下信息：
 - `.ai/missions/{missionId}/config.json`，确认 `module.name`、模块根路径、上下文和输入来源
+- `{projectRoot}/.ai/design/design-context.md`（如存在）
+- `.ai/missions/{missionId}/design/design-context.md`（如存在）
 - 需求文档或 `req-collect` 产物（如存在）
 - UI 图、交互说明、组件清单或用户补充说明
 
 必须先搞清楚：
 - 本次是新建模块，还是在现有模块内扩展
 - 真实目标模块目录名是什么，是否已经写入 `config.json.module.name`
+- 当前项目的主题接入方式是什么，是否存在 `ConfigProvider` 或自定义 Provider 约束
+- 哪些颜色、字号、间距、圆角、阴影等必须沿用现有 token / CSS Variables
+- 哪些项目组件必须优先复用，哪些场景才允许新增本地样式或本地组件
 - 页面要展示哪些数据，分别有哪些加载态、空态、错误态
 - 哪些动作归 `useController`，哪些监听归 `useWatcher`
 - 哪些组件可以直接复用，哪些需要新增本地 `components/`
+
+设计上下文读取顺序：
+1. `.ai/missions/{missionId}/design/design-context.md`
+2. `{projectRoot}/.ai/design/design-context.md`
+3. `ui/component-mapping.md`
+4. `ui/` 原始素材
+5. 当前轮文字描述
+6. `reqDocs/req.md` 中已结构化的页面/交互描述
+
+规则：
+- 若 mission 级与项目级 `design-context.md` 冲突，以 mission 覆盖为准
+- 若不存在任何 `design-context.md`，可以继续开发，但必须显式说明“缺少设计上下文，样式仅按通用实现落地”
 
 目标模块路径解析顺序：
 1. `config.json.module.name`
@@ -66,6 +83,7 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 
 **若上下文来自 mission 目录，至少执行：**
 - `test -f ".ai/missions/{missionId}/config.json"`
+- `test -f ".ai/missions/{missionId}/design/design-context.md"`
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 
 ## 第 2 步：搭建骨架（仅新建模块时）
@@ -151,11 +169,15 @@ src/modules/{ModuleName}/
 - 不写请求，不持有业务状态，不绕过 Hook 直接操作 service
 - 样式文件统一使用 `style.module.less`
 - 通过 `classNames` + CSS Modules 组织样式
+- 如存在 `design-context.md`，优先复用其中约定的项目组件、token 与 CSS Variables
+- 只有现有主题体系无法表达需求时，才允许新增局部样式；新增样式时仍应优先引用既有 token
+- 如果项目通过 `ConfigProvider` 或自定义 Provider 注入 token，不要绕过这条链路另写一套视觉常量
 
 本地 `components/`：
 - 只有在现成组件不满足需求时才新增
 - 每个组件单独目录，使用 `index.tsx` + `style.module.less`
 - 保持“展示组件优先”，不要把模块业务逻辑挪进局部组件
+- 新增本地组件前，先确认 `design-context.md` 中是否已有可复用公共组件或封装入口
 
 ## 第 6 步：收尾校验
 
@@ -167,6 +189,9 @@ src/modules/{ModuleName}/
 - [ ] `layouts/index.ts` 存在 `LayoutEnum.Default -> Default` 映射
 - [ ] 布局和组件样式文件统一使用 `style.module.less`
 - [ ] 布局层只消费 `data` / `controllers`
+- [ ] 如存在 `design-context.md`，实现已遵循其中的主题接入、token 复用和组件优先级约束
+- [ ] 无新增的硬编码颜色、字号、间距、圆角、阴影等视觉体系常量
+- [ ] 未绕过项目既有 `ConfigProvider` / 自定义 Provider / CSS Variables 另写一套主题
 - [ ] 无 `useState`、`useCallback`、`useMemo`、模板占位符残留
 - [ ] `hooks/useWatcher.ts` 存在（即使当前无副作用，也保留空文件）
 
