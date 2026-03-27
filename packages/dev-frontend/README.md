@@ -5,7 +5,7 @@
 ## 核心原则
 
 - `missionId` 只表示任务工作区；`moduleName` 才表示真实业务模块目录名
-- 初始化只创建 `.ai/missions/{missionId}/config.json`；`design/`、`reqDocs/`、`apiDoc/`、`bugDocs/` 在对应 skill / step 第一次执行时按需生成
+- 初始化只创建 `.ai/missions/{missionId}/config.json`；`.ai/docs/`、`reqDocs/`、`apiDoc/`、`bugDocs/` 在对应 skill / step 第一次执行时按需生成
 - 目标模块路径统一按 `projectRoot/moduleRoot/{moduleName}` 解析
 - 仅支持完整路径调用，不使用快捷命令
 - 每个 mission 独立 `config.json`，不依赖包级全局配置
@@ -62,7 +62,6 @@ packages/dev-frontend/
 ```text
 .ai/missions/{missionId}/
 ├── config.json
-├── design/       # design-context-build 按需生成 mission 级设计覆盖
 ├── reqDocs/      # step1 首次生成
 ├── apiDoc/       # step3 首次生成
 ├── bugDocs/      # step4 / step5 首次生成
@@ -72,7 +71,8 @@ packages/dev-frontend/
 说明：
 - skill 文档中的 mission 路径统一写作 `.ai/missions/{missionId}/...`；代码模块目录统一写作 `{ModuleName}` 或 `moduleName`。
 - `bugDocs/bug.md` 是 step4 / step5 的核心交付物；`testDocs/` 不再是 step4 固定产物。
-- 项目级共享设计上下文默认写入 `{projectRoot}/.ai/design/design-context.md`；mission 级差异写入 `.ai/missions/{missionId}/design/design-context.md`。
+- 项目级共享设计上下文默认写入 `{projectRoot}/.ai/docs/design-context.md`。
+- 项目级常用组件清单默认写入 `{projectRoot}/.ai/docs/component-catalog.md`。
 
 ## Mission 配置说明
 
@@ -127,7 +127,7 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 /abs/path/to/project/.ai/dev-frontend/skills/design-context-build/SKILL.md
 ```
 
-该 skill 会从以下来源整理 `design-context.md`：
+该 skill 会从以下来源整理 `design-context.md`，并按需生成 `component-catalog.md`：
 
 - 项目代码中的主题实现、`ConfigProvider` / 自定义 Provider、CSS Variables、公共组件封装
 - 开发者手填的设计规范说明
@@ -136,10 +136,12 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 
 默认产物：
 
-- 项目级基线：`/abs/path/to/project/.ai/design/design-context.md`
-- mission 级覆盖：`/abs/path/to/project/.ai/missions/{missionId}/design/design-context.md`
+- 项目级基线：`/abs/path/to/project/.ai/docs/design-context.md`
+- 项目级组件清单：`/abs/path/to/project/.ai/docs/component-catalog.md`
 
-`step2-ui-dev` 会优先读取 mission 级覆盖，再读取项目级基线；如果两者都不存在，仍可继续开发，但需要显式说明设计上下文缺口。
+`step2-ui-dev` 会直接读取项目级 `.ai/docs/` 文档；如果不存在，仍可继续开发，但需要显式说明设计上下文缺口。
+
+如果目标文档已存在，`design-context-build` 不允许直接覆盖；必须先展示即将覆盖的关键内容，并在用户明确同意后再写入。这样可以避免 `.ai` 下未纳入 git 的文档被静默改写。
 
 ### 3) 使用协调 Agent 决定本轮步骤
 
@@ -199,8 +201,8 @@ mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
 
 - `design-context-build`（独立补充 skill）
   - 输入：可选 `mission` 路径 + 项目代码 + 设计资源目录 + 开发者补充说明 + 当前轮文字描述
-  - 输出：项目级 `.ai/design/design-context.md`，以及按需生成的 mission 级 `design/design-context.md`
-  - 规则：不进入主线 step 排序；有文档时 `step2-ui-dev` 必须优先消费，没有文档时不阻塞其他 step
+  - 输出：项目级 `.ai/docs/design-context.md`，以及可选的 `.ai/docs/component-catalog.md`
+  - 规则：不进入主线 step 排序；有文档时 `step2-ui-dev` 必须优先消费；已有文档时必须先展示拟覆盖内容并征得同意后再写入
 
 - `step1-req-collect`
   - 输入：mission 路径 + 当前轮需求材料或 `reqDocs/` 原始材料；已有 `req.md` 时按增量规则更新
@@ -210,8 +212,8 @@ mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
   - 输入：`reqDocs/req.md` + `config.json` + 可用设计上下文 + 可用 UI 上下文
   - 输出：模块代码（`projectRoot/moduleRoot/{moduleName}`）
   - 设计上下文优先级：
-    - `design/design-context.md`
-    - `{projectRoot}/.ai/design/design-context.md`
+    - `{projectRoot}/.ai/docs/design-context.md`
+    - `{projectRoot}/.ai/docs/component-catalog.md`
     - 若均不存在，则显式说明缺口后继续按通用实现落地
   - UI 上下文优先级：
     - orchestrator / 标准链路：`ui/component-mapping.md` -> `ui/` 原始素材 -> `reqDocs/req.md` 中已结构化的页面/交互描述

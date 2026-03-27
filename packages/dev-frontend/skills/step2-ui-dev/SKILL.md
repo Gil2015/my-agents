@@ -49,8 +49,8 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 
 读取以下信息：
 - `.ai/missions/{missionId}/config.json`，确认 `module.name`、模块根路径、上下文和输入来源
-- `{projectRoot}/.ai/design/design-context.md`（如存在）
-- `.ai/missions/{missionId}/design/design-context.md`（如存在）
+- `{projectRoot}/.ai/docs/design-context.md`（如存在）
+- `{projectRoot}/.ai/docs/component-catalog.md`（如存在）
 - 需求文档或 `req-collect` 产物（如存在）
 - UI 图、交互说明、组件清单或用户补充说明
 
@@ -59,21 +59,21 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 - 真实目标模块目录名是什么，是否已经写入 `config.json.module.name`
 - 当前项目的主题接入方式是什么，是否存在 `ConfigProvider` 或自定义 Provider 约束
 - 哪些颜色、字号、间距、圆角、阴影等必须沿用现有 token / CSS Variables
-- 哪些项目组件必须优先复用，哪些场景才允许新增本地样式或本地组件
+- 哪些全局组件或 npm 组件必须优先复用，哪些场景才允许新增本地样式或本地组件
 - 页面要展示哪些数据，分别有哪些加载态、空态、错误态
 - 哪些动作归 `useController`，哪些监听归 `useWatcher`
 - 哪些组件可以直接复用，哪些需要新增本地 `components/`
 
 设计上下文读取顺序：
-1. `.ai/missions/{missionId}/design/design-context.md`
-2. `{projectRoot}/.ai/design/design-context.md`
+1. `{projectRoot}/.ai/docs/design-context.md`
+2. `{projectRoot}/.ai/docs/component-catalog.md`
 3. `ui/component-mapping.md`
 4. `ui/` 原始素材
 5. 当前轮文字描述
 6. `reqDocs/req.md` 中已结构化的页面/交互描述
 
 规则：
-- 若 mission 级与项目级 `design-context.md` 冲突，以 mission 覆盖为准
+- 若存在 `component-catalog.md`，新增本地组件前必须先检查是否已有可复用的全局组件或 npm 组件
 - 若不存在任何 `design-context.md`，可以继续开发，但必须显式说明“缺少设计上下文，样式仅按通用实现落地”
 
 目标模块路径解析顺序：
@@ -83,7 +83,6 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 
 **若上下文来自 mission 目录，至少执行：**
 - `test -f ".ai/missions/{missionId}/config.json"`
-- `test -f ".ai/missions/{missionId}/design/design-context.md"`
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 
 ## 第 2 步：搭建骨架（仅新建模块时）
@@ -177,7 +176,7 @@ src/modules/{ModuleName}/
 - 只有在现成组件不满足需求时才新增
 - 每个组件单独目录，使用 `index.tsx` + `style.module.less`
 - 保持“展示组件优先”，不要把模块业务逻辑挪进局部组件
-- 新增本地组件前，先确认 `design-context.md` 中是否已有可复用公共组件或封装入口
+- 新增本地组件前，先确认 `component-catalog.md` 中是否已有可复用全局组件或 npm 组件
 
 ## 第 6 步：收尾校验
 

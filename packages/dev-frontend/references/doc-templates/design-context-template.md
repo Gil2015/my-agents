@@ -1,34 +1,29 @@
 # 设计上下文文档模板（design-context.md）
 
-适用于 `design-context-build` 产出的项目级或 mission 级 `design-context.md`。该文档的目标是让 `step2-ui-dev` 能稳定复用项目既有主题、token、组件和样式约束，而不是临场新写一套设计语言。
+适用于 `design-context-build` 产出的项目级 `design-context.md`。该文档的目标是让 `step2-ui-dev` 能稳定复用项目既有主题、token、组件和样式约束，而不是临场新写一套设计语言。
 
-## 作用域约定
+## 路径约定
 
-支持两种作用域：
+固定路径：
 
-1. 项目级基线：`{projectRoot}/.ai/design/design-context.md`
-2. mission 级覆盖：`.ai/missions/{missionId}/design/design-context.md`
+1. 项目级基线：`{projectRoot}/.ai/docs/design-context.md`
 
 规则：
-- 项目级基线记录长期共享规则
-- mission 级覆盖只记录当前任务新增或覆盖的规则
-- 两者冲突时，`ui-dev` 以 mission 级覆盖优先
+- 所有需求任务共用同一份项目级设计基线
+- 不在 mission 目录下重复维护设计规范文档
 
 ## `design-context.md` 模板
 
 ```markdown
 # 设计上下文文档（design-context.md）
-
-- 作用域：PROJECT_BASELINE | MISSION_OVERRIDE
 - 项目根目录：/abs/path/to/project
-- Mission ID（可选）：20260327-103000
 - Theme Mode：css_vars | js_tokens | mixed | unknown
 - 文档状态：VERIFIED | PARTIAL
 - 最近更新：2026-03-27
 - 来源摘要：project code / developer notes / design assets / user input
 
 ## Summary
-{1-3 句话概述本项目或本任务应遵循的视觉与组件规范}
+{1-3 句话概述本项目应遵循的视觉与组件规范}
 
 ## Theme Integration
 - **Provider Entry:** {真实 Provider 入口文件或组件；没有则写 N/A}
@@ -36,13 +31,14 @@
 - **Style Entrypoints:** {全局 less/css/theme 入口}
 - **Runtime Notes:** {主题在运行时如何注入、切换或覆盖}
 - **Confidence:** high | medium | low
+- **CSS Variable Prefixes (if any):** {例如 `--m9-`；没有则写 `None`}
 
 ## Token Mapping
 
 ### Colors
 | Semantic | Actual Token / Var | Usage Rule | Evidence Level | Source |
 |----------|--------------------|------------|----------------|--------|
-| primary  | `--color-primary`  | 主按钮、主操作高亮 | code_verified | `src/styles/theme.css` |
+| primary  | `--m9-color-primary`  | 主按钮、主操作高亮 | code_verified | `src/styles/theme.css` |
 
 ### Typography
 | Semantic | Actual Token / Var | Usage Rule | Evidence Level | Source |
@@ -55,8 +51,8 @@
 | card-radius | `borderRadiusLG` | 卡片、弹层圆角 | doc_verified | `docs/design/rule.md` |
 
 ## Component Reuse Contract
-- **Project Components First:** {优先复用的公共组件、业务组件、封装入口}
-- **UI Library Fallback:** {当项目组件不满足时，允许直接使用的 UI 库组件}
+- **Global Components First:** {优先复用的全局组件与封装入口}
+- **UI Library Fallback:** {当全局组件不满足时，允许直接使用的 UI 库组件}
 - **Local Components Allowed For:** {只有哪些场景才允许新增本地组件}
 - **Do Not Rebuild:** {项目已有但不应重复封装的组件清单}
 
@@ -87,13 +83,11 @@
 - Q1: {当前仍无法确认的问题}
 - Q2: {另一个待确认项}
 
-## Mission Overrides
-- {仅在 `MISSION_OVERRIDE` 文档中填写；没有则写 `None`}
 ```
 
 ## 写作规则
 
 1. 每条关键结论都要能追溯到证据来源。
-2. 找不到真实 token 时，可以先写语义规则，但要明确标注 `inferred` 或 `open_question`。
-3. 如果项目暂无稳定设计体系，允许产出 `PARTIAL` 文档；不能伪造完整 token 表。
-4. mission 级覆盖只写差异，不复制整份项目级基线。
+2. 对 CSS Variables 必须记录项目中的真实变量名和前缀，不要擅自去掉前缀后再重命名。
+3. 找不到真实 token 时，可以先写语义规则，但要明确标注 `inferred` 或 `open_question`。
+4. 如果项目暂无稳定设计体系，允许产出 `PARTIAL` 文档；不能伪造完整 token 表。
