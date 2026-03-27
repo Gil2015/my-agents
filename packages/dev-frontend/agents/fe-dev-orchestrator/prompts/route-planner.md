@@ -18,6 +18,7 @@
 ## 执行流程
 
 1. 解析 `userGoal`，先判断本轮属于 `init`、`req`、`ui`、`api`、`audit`、`bugfix`、`resume` 中的哪一类。
+   - 若为 `resume`：按 mission 产物现状从后往前检查（`bugDocs/bug.md` → `apiDoc/api.md` → `reqDocs/req.md` → `config.json`），找到最后完成的阶段，以下一步为起始点。
 2. 检查 `missionRoot` 和 `configPath` 是否存在；若本轮是新任务且 mission 尚未初始化，输出先初始化 mission 的结论。
 3. 结合 `artifactSnapshot` 和 `moduleSnapshot`，判断当前最早可进入的有效阶段，以及是否必须回退到更早步骤补上下文。
 4. 只选择满足当前目标所需的最小 skill 序列，不默认扩展到 `step5`。
@@ -38,6 +39,7 @@
       "reason": "需求未结构化，且 module.name 未确定"
     }
   ],
+  "status": "DONE|DONE_WITH_CONCERNS|NEEDS_CONTEXT|BLOCKED",
   "stop_after": "step1-req-collect",
   "backtrack_to": "",
   "missing_context": [],

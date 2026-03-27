@@ -76,6 +76,7 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - `test -d ".ai/missions/{missionId}"`
 - `test -f ".ai/missions/{missionId}/config.json"`
 - `test -f ".ai/missions/{missionId}/bugDocs/bug.md"`
+- `test -f "references/bug-triage-guide.md"` — 缺陷分析指南存在性检查
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 - `find "src/modules/{ModuleName}" -maxdepth 4 -type f | sort`
 
@@ -139,6 +140,10 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - `### 回归结果` 中写明 `PASS` / `FAIL` / `BLOCKED`
 - 回归失败时，不得把状态改成 `FIXED`
 - 回归过程中发现的新风险，可写入当前条目的 `剩余风险`
+
+**至少执行：**
+- 相关测试文件存在时：`npx jest --testPathPattern='{ModuleName}' --no-coverage` 或项目等效命令
+- 无自动化测试时：按 `bug.md` 的 `复现步骤` 手动验证并记录观察结论
 
 ### 第 6 步：UPDATE - 同步修复进度
 

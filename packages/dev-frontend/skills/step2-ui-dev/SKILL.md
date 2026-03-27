@@ -66,7 +66,7 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 
 **若上下文来自 mission 目录，至少执行：**
 - `test -f ".ai/missions/{missionId}/config.json"`
-- `find ".ai/missions/{missionId}" -maxdepth 2 -type f | sort`
+- `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 
 ## 第 2 步：搭建骨架（仅新建模块时）
 
@@ -168,6 +168,7 @@ src/modules/{ModuleName}/
 - [ ] 布局和组件样式文件统一使用 `style.module.less`
 - [ ] 布局层只消费 `data` / `controllers`
 - [ ] 无 `useState`、`useCallback`、`useMemo`、模板占位符残留
+- [ ] `hooks/useWatcher.ts` 存在（即使当前无副作用，也保留空文件）
 
 **至少执行：**
 - `rg -n "__MODULE_NAME__|exampleFn|queryExample|ExampleChildComponent" "src/modules/{ModuleName}"`

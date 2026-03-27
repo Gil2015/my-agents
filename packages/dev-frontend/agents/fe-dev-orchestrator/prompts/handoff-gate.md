@@ -30,6 +30,7 @@
 {
   "current_step": "step2-ui-dev",
   "candidate_next_step": "step3-api-integrate",
+  "status": "DONE|DONE_WITH_CONCERNS|NEEDS_CONTEXT|BLOCKED",
   "gate": "PASS|SOFT_FAIL|HARD_FAIL",
   "missing": [],
   "backtrack_to": "",
@@ -37,6 +38,15 @@
   "reason": ""
 }
 ```
+
+字段说明：
+
+- `gate`：判定结果 — `PASS` 可继续、`SOFT_FAIL` 可收口但不宜继续、`HARD_FAIL` 必须回退。
+- `missing`：当前缺失的文件、字段或条目。
+- `backtrack_to`：需要回退到的阶段（空字符串表示无需回退）。
+- `allowed_next_steps`：当前产物状态下实际可进入的阶段列表；可能为空（如 `HARD_FAIL`）或包含多个候选（如 step3 完成后可选 step4 或直接收口）。orchestrator 应结合 `userGoal` 从中选择。
+- `reason`：判定理由，简要说明通过或不通过的原因。
+- `status`：整体返回状态，取值与"返回状态"表一致。
 
 判定约定：
 
@@ -58,6 +68,7 @@
 - 只根据可验证产物做判断，不根据“通常应该有”来放行。
 - `step1 -> step2` 至少要确认 `reqDocs/req.md` 存在，且模块名可唯一定位。
 - `step2 -> step3` 至少要确认目标模块目录存在，并具备 `index.tsx`、`defs/`、`hooks/`、`layouts/` 基础骨架。
+- `step3 -> step4` 至少要确认本轮目标包含问题收集或缺陷链路，且模块代码和必要文档（`reqDocs/req.md`、可选 `apiDoc/api.md`）可用于审查。
 - `step4 -> step5` 至少要确认 `bugDocs/bug.md` 存在，且已有可执行的 `BUG-*` 条目。
 - `step5` 完成后必须确认目标 `BUG-*` 的状态、根因和回归结果已回写；否则不算真正收口。
 - 如果用户本轮目标本来就只到当前阶段，不要为了“流程完整”强行要求继续下一步。

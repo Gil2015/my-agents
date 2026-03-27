@@ -111,6 +111,7 @@ export const services = {
 2. 再校验 `api.md` 顶部 `- 模块名：`
 3. 若 `config.json` 为空但 `api.md` 已明确模块名，应先同步回 `config.json`
 4. 若两者冲突或仍为空，则返回 `NEEDS_CONTEXT`
+5. 回写 `config.json` 时只增量更新 `module.name` / `module.displayName`，不覆盖其他配置字段。
 
 若缺少以下任一关键信息，不要继续写 `service.ts`：
 - HTTP 方法
@@ -274,6 +275,6 @@ const tableData = useCreation(
 ## 集成关系
 
 - **直接上游：** `ui-dev`
-- **可选上游：** `req-collect`
-- **主测试阶段：** `module-test`
+- **可选上游：** `req-collect`（可参考 `reqDocs/req.md` 中每条 REQ 的 API Dependency 字段确认接口覆盖范围）
+- **直接下游：** `module-test`（`apiDoc/api.md` 是 step4 代码审查的重要输入）
 - **失败回流：** `bug-fix`

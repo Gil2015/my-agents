@@ -22,7 +22,7 @@
 | `req-collect` | `{devFrontendRoot}/skills/step1-req-collect/SKILL.md` | 需求需要结构化、`module.name` 未定、需求变更、现有预期不足以支撑代码或缺陷判断 |
 | `ui-dev` | `{devFrontendRoot}/skills/step2-ui-dev/SKILL.md` | 需要新建或扩展模块 UI，且已有可消费的需求文档或明确直接实现指令 |
 | `api-integrate` | `{devFrontendRoot}/skills/step3-api-integrate/SKILL.md` | 模块骨架已存在，且要把 API 文档或接口说明接进现有模块 |
-| `module-test` | `{devFrontendRoot}/skills/step4-moduletest/SKILL.md` | 需要先收集问题、整理 bug 清单、做需求对码审查，再决定修复 |
+| `module-test` | `{devFrontendRoot}/skills/step4-moduletest/SKILL.md` | 需要收集问题、整理 bug 清单或做需求对码审查；是否进入修复由本轮目标和 handoff-gate 决定 |
 | `bug-fix` | `{devFrontendRoot}/skills/step5-bug-fix/SKILL.md` | `bugDocs/bug.md` 中已有 `BUG-*`，需要继续修复、回归并同步进度 |
 
 ## 子智能体表

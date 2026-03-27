@@ -75,6 +75,7 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 **至少执行：**
 - `test -d ".ai/missions/{missionId}"`
 - `test -f ".ai/missions/{missionId}/config.json"`
+- `test -f "references/bug-discovery-guide.md"` — 审查指南存在性检查
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 - `find "src/modules/{ModuleName}" -maxdepth 4 -type f | sort`
 

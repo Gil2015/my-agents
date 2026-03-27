@@ -70,7 +70,7 @@ EVERY UNCLEAR REQUIREMENT MUST BE FLAGGED - NEVER ASSUME PRODUCT INTENT
 
 **若上下文来自 mission 目录，至少执行：**
 - `test -f ".ai/missions/{missionId}/config.json"`
-- `find ".ai/missions/{missionId}" -maxdepth 2 -type f | sort`
+- `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 
 **当需求来源来自文件系统时，至少执行：**
 - `test -d "{source-folder}"`
