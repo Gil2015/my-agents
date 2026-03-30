@@ -7,11 +7,9 @@ description: 当需要从前端接口文档或独立需求出发，设计后端 
 
 ## 概述
 
-从前端产物（`apiDoc/api.md`、`defs/service.ts`、`defs/type.ts`）或独立后端需求出发，设计并确认后端 API 契约。当前端已有接口定义时，这一步主要是"确认+补充后端视角信息"，而不是从零设计。产出一份后端开发可直接消费的 `api-design.md`，包含 DTO 定义、VO 结构、业务逻辑规则、权限控制和数据校验。
+从前端产物（`apiDoc/api.md`、前端模块 `defs/service.ts`、`defs/type.ts`）或独立后端需求出发，设计并确认后端 API 契约，产出后端可直接消费的 `api-design.md`。
 
 **核心原则：** 前端契约是起点，后端设计是补全。前端定义了"调什么"，后端补全"怎么做"。
-
-**违反规则的字面意思就是违反规则的精神。**
 
 ## 适用场景
 
@@ -28,15 +26,13 @@ description: 当需要从前端接口文档或独立需求出发，设计后端 
 - 纯后端内部接口，不对外暴露
 - 接口文档缺少关键信息，无法确定方法、路径或响应结构
 
-觉得"前端的 api.md 直接照抄就行"？停下来。前端定义的是调用契约，后端还需要补校验、权限、业务逻辑。
-
 ## 铁律
 
 ```text
 FRONTEND CONTRACT IS THE STARTING POINT - BACKEND DESIGN COMPLETES IT
 ```
 
-**没有例外：**
+硬约束：
 
 - 前端已定义的接口路径和响应结构，默认沿用，除非有明确的后端限制
 - 如果后端需要调整前端已定义的契约，必须在 `api-design.md` 中标记 `NEEDS_ADJUST` 并说明原因
@@ -45,7 +41,7 @@ FRONTEND CONTRACT IS THE STARTING POINT - BACKEND DESIGN COMPLETES IT
 
 ## 违反后果
 
-如果 `api-design.md` 不存在、DTO 校验规则缺失、或后端设计与前端契约有未标记的不一致，当前 API 设计视为未完成；`db-design` 和 `module-dev` 不应在这种上下文不完整的情况下启动。
+如果 `api-design.md` 不存在、DTO 校验规则缺失，或与前端契约有未标记的不一致，当前 API 设计视为未完成；`db-design` 和 `module-dev` 不应启动。
 
 ## 执行流程
 
@@ -56,16 +52,18 @@ FRONTEND CONTRACT IS THE STARTING POINT - BACKEND DESIGN COMPLETES IT
 **从前端 mission 产物读取（推荐）：**
 
 - `.ai/missions/{missionId}/apiDoc/api.md` — 前端视角的接口定义
-- 前端模块 `defs/service.ts` — 实际调用的路径和参数
-- 前端模块 `defs/type.ts` — 请求/响应类型定义
+- `"{projectRoot}/{moduleRoot}/{module.name}/defs/service.ts"` — 实际调用的路径和参数
+- `"{projectRoot}/{moduleRoot}/{module.name}/defs/type.ts"` — 请求/响应类型定义
 
 **从配置中读取：**
 
+- `.ai/missions/{missionId}/config.json` 中的 `projectRoot`、`moduleRoot`、`module.name`
 - `.ai/missions/{missionId}/config.json` 中的 `apiDesignSources`
 
 **从独立来源读取：**
 
 - 用户指定的接口文档目录或文件
+- 前端模块路径不符合默认约定时，由 `apiDesignSources` 提供的精确文件路径
 - 用户直接粘贴的接口说明
 
 同时读取：
@@ -79,11 +77,20 @@ FRONTEND CONTRACT IS THE STARTING POINT - BACKEND DESIGN COMPLETES IT
 - 本轮是首次设计，还是在已有 `api-design.md` 上增量更新
 - 前端是否已有接口定义，有则以其为基准
 - 后端模块名是否已写入 `config.json.backend.moduleName`
+- 如果要读取前端 `defs`，是否能根据 `projectRoot + moduleRoot + module.name` 定位到真实文件；若不能，必须改读 `apiDesignSources` 或用户明确给出的路径
+
+定位规则：
+
+- 默认先按 `projectRoot/moduleRoot/module.name/defs/` 定位前端 `defs`
+- 默认路径不存在时，不全量扫描前端目录；改为读取 `apiDesignSources` 或向用户要精确路径
+- `api.md` 与 `defs` 冲突时，在 `api-design.md` 中标记 `NEEDS_ADJUST`
 
 **至少执行：**
 
 - `test -f ".ai/missions/{missionId}/config.json"`
 - `test -f ".ai/missions/{missionId}/apiDoc/api.md" || true`
+- `test -f "{projectRoot}/{moduleRoot}/{module.name}/defs/service.ts" || true`
+- `test -f "{projectRoot}/{moduleRoot}/{module.name}/defs/type.ts" || true`
 
 ### 第 2 步：ALIGN - 对齐前端契约
 
@@ -153,7 +160,6 @@ FRONTEND CONTRACT IS THE STARTING POINT - BACKEND DESIGN COMPLETES IT
 | -------------------------------- | ------------------------------------------------ |
 | "前端的 api.md 直接用就行"       | 前端只定义了调用契约，校验、权限、业务逻辑还要补 |
 | "DTO 校验后面写代码时再加"       | 没有预先设计的校验规则，代码时一定会漏           |
-| "这个接口太简单了不需要设计"     | 再简单的接口也需要明确 DTO 类名和校验规则        |
 | "先把接口路径定了，字段后面再补" | 字段不明确的设计文档对 step3 没有价值            |
 
 ## 危险信号 - 立即停下来
@@ -161,7 +167,6 @@ FRONTEND CONTRACT IS THE STARTING POINT - BACKEND DESIGN COMPLETES IT
 - 你没有读前端 `api.md` 就开始设计接口
 - 你修改了前端已定义的路径但没标记 `NEEDS_ADJUST`
 - 你的 DTO 字段没有 class-validator 校验装饰器说明
-- 你跳过了权限控制的设计
 - 你把前端 `type.ts` 中的展示字段（如 `statusLabel`）写进了后端 VO
 
 ## 参考文档

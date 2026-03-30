@@ -48,6 +48,7 @@
 
 - 读取来源路径时，不得静默忽略不存在的路径
 - 在代码相关步骤中，优先从 `config.json.backend.moduleName` 定位真实模块
+- 代码相关步骤读取模块代码时，默认按 `projectRoot/backend.moduleRoot/{module-name}` 定位；如果 `backend.moduleRoot` 缺失，按 `src/modules` 兜底
 - 如果 `config.json` 与文档顶部 `模块名` 冲突，应返回 `NEEDS_CONTEXT`，不要擅自选边
 - 前端已有的 `reqDocSources`、`apiDocSources` 字段可直接复用
 
@@ -79,6 +80,7 @@
 - 后端 skills 可以直接读取同一 mission 下的 `reqDocs/req.md` 和 `apiDoc/api.md`
 - 前端 `api.md` 是后端 `api-design.md` 的主要输入来源之一
 - 前端 `defs/type.ts` 和 `defs/service.ts` 中的字段名和路径是后端实现的参考约束
+- 读取前端 `defs` 时，默认按 `projectRoot/moduleRoot/module.name/defs/` 定位；若不满足该约定，必须通过 `apiDesignSources` 或用户输入提供精确路径
 - 后端实现结果如与前端契约不一致，必须在 `api-design.md` 中标记 `NEEDS_ADJUST`
 
 ## 10. 参考映射

@@ -7,11 +7,9 @@ description: 当需要修复已经登记在 bugDocs/bug.md 中的后端模块问
 
 ## 概述
 
-这个阶段只负责基于 `bugDocs/bug.md` 中已登记的 `BUG-*` 做分析、修复、回归和进度回写，不负责收集新 Bug。交付物是可映射到既有 `BUG-*` 的代码变更，以及状态、根因和回归结果都已同步的同一份 `bug.md`。
+这个阶段只负责基于 `bugDocs/bug.md` 中已登记的 `BUG-*` 做分析、修复、回归和进度回写，不负责收集新 Bug。交付物是可映射到既有 `BUG-*` 的代码变更和同步更新后的同一份 `bug.md`。
 
 **核心原则：** 只修已登记的，修完要验证，验证要记录。
-
-**违反规则的字面意思就是违反规则的精神。**
 
 ## 适用场景
 
@@ -33,7 +31,7 @@ description: 当需要修复已经登记在 bugDocs/bug.md 中的后端模块问
 ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 ```
 
-**没有例外：**
+硬约束：
 
 - 动代码前必须先锁定本轮要处理的 `BUG-*`
 - 第五步不新增 `BUG-*`；如果回归时发现独立新问题，回到 `module-test` 建档
@@ -51,12 +49,12 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 
 优先读取以下信息：
 
-- `.ai/missions/{missionId}/config.json`
+- `.ai/missions/{missionId}/config.json`：读取 `projectRoot`、`backend.moduleName`、`backend.moduleRoot`
 - `.ai/missions/{missionId}/bugDocs/bug.md`
 - `.ai/missions/{missionId}/apiDesign/api-design.md`
 - `.ai/missions/{missionId}/dbDesign/db-schema.md`
 - `.ai/missions/{missionId}/reqDocs/req.md`
-- `src/modules/{module-name}/`
+- `{projectRoot}/{backend.moduleRoot}/{module-name}/`；若 `backend.moduleRoot` 缺失，按 `src/modules` 兜底
 
 必须先确认：
 
@@ -68,7 +66,7 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 
 - `test -f ".ai/missions/{missionId}/bugDocs/bug.md"`
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
-- `find "src/modules/{module-name}" -maxdepth 4 -type f | sort`
+- `find "{projectRoot}/{backend.moduleRoot}/{module-name}" -maxdepth 4 -type f | sort`
 
 ### 第 2 步：PICK - 锁定本轮修复对象
 
@@ -169,14 +167,12 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 | "这个问题很小，不用挂 BUG-\*" | 没有编号，就没有边界和回归    |
 | "顺手把旁边也一起改了"        | 你在扩大风险面                |
 | "回归结果晚点再补"            | 没有回归记录的 FIXED 没有意义 |
-| "改了 Entity 就不用改文档了"  | `db-schema.md` 必须同步       |
 
 ## 危险信号 - 立即停下来
 
 - 你还没锁定 `BUG-*`，就开始改代码
 - 你准备通过增加 `try-catch` 来"压住"异常
 - 你把状态改成 `FIXED`，但没有回归记录
-- 你更新了 Entity 但没同步 `db-schema.md`
 - 你更新了代码，却没同步 `bug.md` 顶部进度摘要
 
 ## 参考文档

@@ -90,8 +90,14 @@ packages/dev-backend/
 - `backend.orm`：ORM 类型（`typeorm` / `prisma` / `sequelize`）
 - `backend.database`：数据库类型（`postgresql` / `mysql` / `sqlite`）
 - `backend.moduleName`：后端业务模块目录名（kebab-case）
-- `apiDesignSources`：后端 API 设计来源
+- `apiDesignSources`：后端 API 设计来源；当前端 `defs/service.ts`、`defs/type.ts` 不在 `projectRoot/moduleRoot/module.name/defs/` 下时，应在这里显式补充路径
 - `dbDesignSources`：数据库设计来源
+
+前端契约定位约定：
+
+- 同 mission 下读取前端 `defs/service.ts`、`defs/type.ts` 时，默认按 `projectRoot/moduleRoot/module.name/defs/` 定位
+- 如果 `module.name` 缺失、前端模块目录不在 `moduleRoot` 下，或实际路径不符合默认约定，必须通过 `apiDesignSources` 或用户输入提供精确文件路径
+- 不为定位前端 `defs` 而全量扫描整个前端代码目录；先按配置定位，失败后再读取显式来源
 
 ## Mission 目录规范
 
