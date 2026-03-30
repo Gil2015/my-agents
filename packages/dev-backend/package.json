@@ -1,0 +1,6 @@
+{
+  "name": "@gai/dev-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NestJS 后端开发全流程技能包"
+}
