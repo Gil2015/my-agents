@@ -56,7 +56,7 @@
 
 ```text
 scripts/<task-slug>/
-  readme.md
+  README.md
   run.command
   steps/
     01-prepare.sh
@@ -70,7 +70,7 @@ scripts/<task-slug>/
 ```
 
 含义：
-- `readme.md` 说明整个任务目录怎么用
+- `README.md` 说明整个任务目录怎么用
 - `run.command` 是便捷入口
 - `steps/` 才是真正的执行单元
 - `helpers/` 只在 shell 过于脆弱时才存在

@@ -28,7 +28,7 @@
 
 ```text
 给我拆成多个脚本文件放在 scripts/yq-morning-boot 里，最好保留 steps 子目录，方便我后面单独调试。
-生成完后请附带 readme.md，说明每个脚本怎么用。
+生成完后请附带 README.md，说明每个脚本怎么用。
 ```
 
 ## 单入口交付

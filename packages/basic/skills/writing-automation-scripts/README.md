@@ -24,7 +24,7 @@
 
 ```text
 帮我写一套本地自动化脚本：打开 IDE、启动 2 个项目、等待服务就绪后打开浏览器。
-脚本要带注释，生成后附带 readme.md。
+脚本要带注释，生成后附带 README.md。
 ```
 
 ```text
@@ -49,7 +49,7 @@
 
 这个 skill 默认会：
 - 优先生成 `scripts/<task-slug>/`
-- 多文件交付时补 `readme.md`
+- 多文件交付时补 `README.md`
 - 单文件交付时补同名 `.md`
 - 默认加入关键注释
 - 显式说明假设、风险、验证方式
@@ -94,7 +94,7 @@ cat > .claude/commands/write-automation-script.md <<'EOF'
 
 按其中的规则帮我生成脚本。默认要求：
 - 脚本必须带关键注释
-- 多文件交付时补 `readme.md`
+- 多文件交付时补 `README.md`
 - 单文件交付时补同名 `.md`
 
 需求：$ARGUMENTS
@@ -116,7 +116,7 @@ cat > ~/.claude/commands/write-automation-script.md <<'EOF'
 
 按其中的规则帮我生成脚本。默认要求：
 - 脚本必须带关键注释
-- 多文件交付时补 `readme.md`
+- 多文件交付时补 `README.md`
 - 单文件交付时补同名 `.md`
 
 需求：$ARGUMENTS
