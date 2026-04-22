@@ -6,15 +6,17 @@
 
 ```
 basic/
-├── CLAUDE.md           # 本文件
+├── AGENTS.md           # 本文件
+├── CLAUDE.md           # 供 Claude 使用的项目说明
 ├── package.json
 └── skills/
-    ├── git-cherry-pick-squash/ # 公司工作时使用的跨分支 cherry-pick / squash skill
-    ├── review-skill/   # 审核 Skill 写法
-    ├── review-agent/   # 审核 Agent/SubAgent 写法
-    └── {skill-name}/   # 每个技能一个目录
-        ├── SKILL.md    # 主文件（必需）
-        └── references/ # 参考文档（可选）
+    ├── git-cherry-pick-squash/    # 公司工作时使用的跨分支 cherry-pick / squash skill
+    ├── review-skill/              # 审核 Skill 写法
+    ├── review-agent/              # 审核 Agent/SubAgent 写法
+    ├── writing-automation-scripts/ # 编写或整理本地自动化脚本
+    └── {skill-name}/              # 每个技能一个目录
+        ├── SKILL.md               # 主文件（必需）
+        └── references/            # 参考文档（可选）
 ```
 
 ## 当前技能
@@ -22,6 +24,7 @@ basic/
 - `review-skill`：审查和优化已有 Skill 写法。
 - `review-agent`：审查和优化 Agent / SubAgent 写法。
 - `git-cherry-pick-squash`：公司工作时使用的提交流转 skill，用于按作者筛选跨分支提交、生成清单，并按 STORY 分组 cherry-pick 到当前分支。
+- `writing-automation-scripts`：编写或整理本地自动化脚本，包括启动项目、一键运行流程、批处理、文件整理、应用控制，以及调用本地 CLI / HTTP API / AI 工具的脚本。
 
 ## 新增技能流程
 

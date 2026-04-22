@@ -8,12 +8,14 @@
 skills学习/
 ├── package.json                    # 根 monorepo（workspaces: packages/*）
 ├── AGENTS.md                       # 本文件 — 项目总览 + 规则（供大部分AI使用）
-├── CLAUDE.md                       # 本文件 — 项目总览 + 规则（供 Claude 使用）
+├── CLAUDE.md                       # 供 Claude 使用的项目总览 + 规则
 └── packages/
     ├── basic/                      # @gai/basic — 通用技能
     │   └── skills/
+    │       ├── git-cherry-pick-squash/ # 公司工作流中的提交整理与跨分支迁移
     │       ├── review-skill/       # 审核 Skill 写法
-    │       └── review-agent/       # 审核 Agent/SubAgent 写法
+    │       ├── review-agent/       # 审核 Agent/SubAgent 写法
+    │       └── writing-automation-scripts/ # 编写或整理本地自动化脚本
     └── dev-frontend/               # @gai/dev-frontend — mission 化前端主线
         ├── README.md               # 使用说明（mission 目录、绝对路径调用）
         ├── skills/                 # step1~step5 分阶段 Skill
@@ -30,6 +32,7 @@ skills学习/
 ### @gai/basic
 
 通用技能包，存放与特定技术栈无关的技能。详见 `packages/basic/`。
+当前包含 `review-skill`、`review-agent`、`git-cherry-pick-squash`、`writing-automation-scripts` 等技能。
 
 ### @gai/dev-frontend
 
