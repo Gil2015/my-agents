@@ -6,7 +6,8 @@
 
 - `missionId` 只表示任务工作区；`moduleName` 才表示真实业务模块目录名
 - 初始化只创建 `.ai/missions/{missionId}/config.json`；`.ai/docs/`、`reqDocs/`、`apiDoc/`、`bugDocs/` 在对应 skill / step 第一次执行时按需生成
-- 目标模块路径统一按 `projectRoot/moduleRoot/{moduleName}` 解析
+- 目标模块路径默认按 `projectRoot/moduleRoot/{moduleName}` 解析；最终以当前业务模块模板 `template.json` 的 `targetPath` 为准
+- 业务模块模板是完整代码目录，使用时整套复制到目标模块位置，再替换占位符
 - 仅支持完整路径调用，不使用快捷命令
 - 每个 mission 独立 `config.json`，不依赖包级全局配置
 
@@ -24,7 +25,7 @@ packages/dev-frontend/
 │           └── route-planner.md
 ├── references/
 │   ├── doc-templates/
-│   ├── module-template/
+│   ├── module-templates/          # 内置业务模块模板
 │   └── rules/
 ├── scripts/
 │   └── create-mission.sh
@@ -44,7 +45,8 @@ packages/dev-frontend/
 - `design-context-build` 是独立可选 skill，不进入 `step1 -> step5` 的默认排序；存在设计上下文需求时，可在 `step2-ui-dev` 前单独运行。
 - `agents/fe-dev-orchestrator/` 用于根据当前 mission 状态自动选择最小必要步骤。
 - 目录名带 `stepX-` 前缀用于流程排序；对应 skill 名分别是 `req-collect`、`ui-dev`、`api-integrate`、`module-test`、`bug-fix`。
-- `references/doc-templates/`、`references/rules/`、`references/module-template/` 分别维护共享文档模板、规则和模块结构基线。
+- `references/doc-templates/`、`references/rules/`、`references/module-templates/` 分别维护共享文档模板、规则和内置业务模块模板。
+- 目标项目可在 `.ai/dev-frontend/references/module-templates/{templateId}` 维护项目自己的业务模块模板；项目内模板优先于工具内置模板。
 
 ## Mission 目录规范
 
@@ -69,7 +71,7 @@ packages/dev-frontend/
 ```
 
 说明：
-- skill 文档中的 mission 路径统一写作 `.ai/missions/{missionId}/...`；代码模块目录统一写作 `{ModuleName}` 或 `moduleName`。
+- skill 文档中的 mission 路径统一写作 `.ai/missions/{missionId}/...`；代码模块目录统一使用当前业务模块模板 `targetPath` 的渲染结果描述。
 - `bugDocs/bug.md` 是 step4 / step5 的核心交付物；`testDocs/` 不再是 step4 固定产物。
 - 项目级共享设计上下文默认写入 `{projectRoot}/.ai/docs/design-context.md`。
 - 项目级常用组件清单默认写入 `{projectRoot}/.ai/docs/component-catalog.md`。
@@ -83,6 +85,10 @@ packages/dev-frontend/
   "moduleRoot": "src/modules",
   "componentRoot": "src/components",
   "uiLibPackage": "",
+  "moduleTemplate": {
+    "id": "m9-module",
+    "root": ""
+  },
   "module": {
     "name": "",
     "displayName": ""
@@ -104,6 +110,8 @@ packages/dev-frontend/
 说明：
 
 - `moduleRoot`、`componentRoot`、`uiLibPackage` 是 mission 初始化时写入的默认值，仅作为初始假设。
+- `moduleTemplate.id` 是当前 mission 使用的业务模块模板 ID；初始化默认写入 `m9-module`，开发人员可按项目约定手动修改。
+- `moduleTemplate.root` 可显式指定一个业务模块模板路径；非空时优先使用该路径，不再自动回退。
 - `module.name` 是真实业务模块目录名，例如 `FundCalculation`；它与 `mission.id` 没有命名关系，不能互相替代。
 - `module.displayName` 用于文档展示，可为空。
 - `bugDocSources` 用于 step4 收口用户补充文档、日志或其他缺陷来源。
@@ -117,6 +125,43 @@ packages/dev-frontend/
 # 以下命令面向“已安装到目标项目 .ai/dev-frontend/”的场景
 # 在项目根目录执行，默认使用 ./.ai
 sh .ai/dev-frontend/scripts/create-mission.sh
+```
+
+解析顺序：
+
+1. `config.json.moduleTemplate.root` 非空时使用该显式路径
+2. `{projectRoot}/.ai/dev-frontend/references/module-templates/{moduleTemplate.id}`
+3. `{devFrontendRoot}/references/module-templates/{moduleTemplate.id}`
+
+定位到模板目录后，直接读取其中的 `template.json`。`template.json` 负责声明目标路径、必需文件和占位符清理规则。
+
+如果项目希望固定默认模板，可以在项目 `AGENTS.md` 中写明约定，例如“新 mission 创建后将 `moduleTemplate.id` 改为 `table-page`”。最终执行时仍以当前 mission 的 `config.json.moduleTemplate` 为准，避免不同 step 对模板选择产生分歧。
+
+业务模块模板目录示例：
+
+```text
+.ai/dev-frontend/references/module-templates/table-page/
+├── template.json
+├── README.md
+├── index.tsx
+├── defs/
+├── hooks/
+├── layouts/
+└── utils.ts
+```
+
+`template.json` 用来描述这套代码模板怎么复制和校验，不是模板本体：
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "table-page",
+  "displayName": "表格页业务模块模板",
+  "targetPath": "{moduleRoot}/{module.name}",
+  "requiredFiles": ["index.tsx", "defs/type.ts", "hooks/index.ts"],
+  "placeholderPatterns": ["__MODULE_NAME__", "queryExample"],
+  "forbiddenPatterns": ["index\\.module\\.less"]
+}
 ```
 
 ### 2) 可选：先生成设计上下文文档
@@ -210,7 +255,7 @@ mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
   - 返回：仍存在 `[OPEN]` 澄清项，或 `module.name` 仍未确定时，使用 `DONE_WITH_CONCERNS`
 - `step2-ui-dev`
   - 输入：`reqDocs/req.md` + `config.json` + 可用设计上下文 + 可用 UI 上下文
-  - 输出：模块代码（`projectRoot/moduleRoot/{moduleName}`）
+  - 输出：模块代码（当前业务模块模板的 `targetPath` 渲染结果，默认 `projectRoot/moduleRoot/{moduleName}`）
   - 设计上下文优先级：
     - `{projectRoot}/.ai/docs/design-context.md`
     - `{projectRoot}/.ai/docs/component-catalog.md`
@@ -218,9 +263,9 @@ mission 路径：/abs/path/to/project/.ai/missions/20260324-103000
   - UI 上下文优先级：
     - orchestrator / 标准链路：`ui/component-mapping.md` -> `ui/` 原始素材 -> `reqDocs/req.md` 中已结构化的页面/交互描述
     - 直接调用 `step2-ui-dev` skill：`ui/component-mapping.md` -> `ui/` 原始素材 -> 当前轮文字描述 -> `reqDocs/req.md` 中已结构化的页面/交互描述
-  - 规则：目标模块路径优先从 `config.json.module.name` 解析；若为空，则回退到 `reqDocs/req.md` 顶部 `模块名`；两者冲突或仍为空时返回 `NEEDS_CONTEXT`
+  - 规则：先按 `moduleTemplate.root/id` 定位业务模块模板目录并读取 `template.json`；目标模块路径优先从 `config.json.module.name` 和模板 `targetPath` 解析；若为空，则回退到 `reqDocs/req.md` 顶部 `模块名`；两者冲突或仍为空时返回 `NEEDS_CONTEXT`
   - 设计约束：如存在 `design-context.md`，必须优先复用其中定义的主题接入方式、token 与组件优先级，不得静默新写一套视觉体系
-  - 最小产物：模块入口、基础类型、必要 hooks、至少一个布局入口与作用域样式文件；`defs/service.ts` 仅允许保留 `step3-api-integrate` 可继续接手的占位实现
+  - 最小产物：必须满足当前业务模块模板的 `requiredFiles`；`defs/service.ts` 等接口占位只在模板包含时保留，并保证 `step3-api-integrate` 可继续接手
 - `step3-api-integrate`
   - 输入：`apiDoc/api.md` + 目标模块代码 + `config.json`
   - 输出：`defs/service.ts` / `defs/type.ts` 等真实接口联调更新，以及接口差异记录

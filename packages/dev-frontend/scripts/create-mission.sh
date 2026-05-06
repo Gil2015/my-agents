@@ -80,6 +80,10 @@ if ! cat > "${mission_dir}/config.json" <<JSON
   "moduleRoot": "src/modules",
   "componentRoot": "src/components",
   "uiLibPackage": "",
+  "moduleTemplate": {
+    "id": "m9-module",
+    "root": ""
+  },
   "module": {
     "name": "",
     "displayName": ""
@@ -103,8 +107,9 @@ fi
 
 print_status \
   "DONE_WITH_CONCERNS" \
-  "Mission created. Confirm moduleRoot, componentRoot, uiLibPackage, and fill module.name before code steps." \
+  "Mission created. Confirm moduleRoot, componentRoot, uiLibPackage, moduleTemplate.id, and fill module.name before code steps." \
   "MISSION_ID" "${mission_id}" \
   "MISSION_PATH" "${mission_dir}" \
   "WORKSPACE_ROOT" "${workspace_abs}" \
-  "PROJECT_ROOT" "${project_root}"
+  "PROJECT_ROOT" "${project_root}" \
+  "MODULE_TEMPLATE_ID" "m9-module"

@@ -2,5 +2,8 @@
   "name": "@gai/dev-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "前端开发全流程技能包"
+  "description": "前端开发全流程技能包",
+  "scripts": {
+    "test": "node --test scripts/*.test.mjs"
+  }
 }

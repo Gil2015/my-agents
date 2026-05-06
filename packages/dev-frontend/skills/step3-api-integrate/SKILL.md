@@ -113,6 +113,12 @@ export const services = {
 4. 若两者冲突或仍为空，则返回 `NEEDS_CONTEXT`
 5. 回写 `config.json` 时只增量更新 `module.name` / `module.displayName`，不覆盖其他配置字段。
 
+定位代码目录前，必须先按 `config.json.moduleTemplate` 定位业务模块模板目录并读取 `template.json`：
+- `moduleTemplate.root` 非空时，直接使用该路径
+- 否则使用 `{devFrontendRoot}/references/module-templates/{moduleTemplate.id}`
+- 使用模板 `targetPath` 渲染出的 `{targetModulePath}` 作为目标模块代码目录
+- 使用模板 `requiredFiles`、`placeholderPatterns`、`forbiddenPatterns` 作为结构和残留校验来源
+
 若缺少以下任一关键信息，不要继续写 `service.ts`：
 - HTTP 方法
 - 实际路径
@@ -159,9 +165,9 @@ export const services = {
 
 ## 第 4 步：更新 `defs/service.ts`
 
-默认遵循 `../../references/module-template/defs/service.ts` 的模式：
+默认遵循当前业务模块模板中已有 `defs/service.ts` 或等效 service 文件的模式：
 - 使用 `export const services = { ... }` 统一导出
-- 保持模块现有的请求封装；如果是新模块，按模板使用统一 `http(...)`
+- 保持模块现有的请求封装；如果是新模块，按当前业务模块模板使用统一请求封装
 - GET 用 `params`，POST/PUT/PATCH 用 `data`
 
 示例：
@@ -195,14 +201,14 @@ export const services = {
 规则：
 - 后端未就绪时，mock 是“契约镜像”，不是随意编数据
 - 已知会触发边界逻辑的字段，要在 mock 中体现，如空列表、`null` 状态、错误码
-- 删除 `example/queryExample`、`__MODULE_NAME__` 等模板残留
+- 删除当前业务模块模板的 `placeholderPatterns` 残留
 
 ## 第 6 步：接入 `hooks/useData.ts`
 
 把真实接口接到数据层，而不是接到布局层。
 
 至少完成以下动作：
-- 将桩代码的 `services.queryExample` 替换为真实 service
+- 将模板桩代码替换为真实 service；内置 `m9-module` 通常是把 `services.queryExample` 替换为真实 service
 - 调整请求参数组装方式，确保与接口契约一致
 - 在 `useData.ts` 中完成响应到 UI 数据的映射
 - 对已知业务错误码补充错误处理或兜底状态
@@ -237,8 +243,9 @@ const tableData = useCreation(
 - [ ] 模板占位符和示例接口已清理
 
 **至少执行：**
-- `rg -n "__MODULE_NAME__|queryExample|example/queryExample" "src/modules/{ModuleName}"`
-- `rg -n "services =|useRequest\\(|useCreation\\(" "src/modules/{ModuleName}"`
+- `rg -n "{template.placeholderPatterns}" "{targetModulePath}"`
+- `rg -n "{template.forbiddenPatterns}" "{targetModulePath}"`
+- `rg -n "services =|useRequest\\(|useCreation\\(" "{targetModulePath}"`
 - `test -f ".ai/missions/{missionId}/apiDoc/api.md"`
 
 ## 常用模式
@@ -269,7 +276,7 @@ const tableData = useCreation(
 |------|------|
 | 通用规则 | `../../references/rules/common-rules.md` |
 | 接口文档模板 | `../../references/doc-templates/api-doc-template.md` |
-| 共享模块模板 | `../../references/module-template/` |
+| 内置业务模块模板 | `../../references/module-templates/{templateId}/` |
 | 业务侧与工程侧代码规则 | `../../references/rules/frontend-code-rules.md` |
 
 ## 集成关系

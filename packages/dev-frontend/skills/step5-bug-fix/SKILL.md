@@ -60,7 +60,7 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - `.ai/missions/{missionId}/bugDocs/bug.md`：当前缺陷清单、状态、优先级和历史修复信息
 - `.ai/missions/{missionId}/reqDocs/req.md`：需求和验收标准，确认正确行为
 - `.ai/missions/{missionId}/apiDoc/api.md`：接口契约、错误码和边界输入
-- `src/modules/{ModuleName}/`：实际实现、现有测试代码和依赖链路
+- 当前业务模块模板 `targetPath` 渲染出的 `{targetModulePath}`：实际实现、现有测试代码和依赖链路
 - 开发者补充的上下文：当前 Bug 的复现细节、截图、日志、控制台报错
 
 必须先确认：
@@ -69,6 +69,7 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - 哪些 Bug 共享同一根因，哪些是独立问题
 - 哪些问题已经 `BLOCKED`，当前不应继续硬修
 - 当前模块代码路径是否与 `config.json.module.name`、文档顶部 `模块名` 保持一致
+- 当前 mission 的业务模块模板是否能定位，且 `{targetModulePath}` 指向真实模块目录
 
 如果当前问题还没进 `bug.md`，不要在第五步顺手建条目；先回到第四步收口。
 
@@ -78,7 +79,8 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - `test -f ".ai/missions/{missionId}/bugDocs/bug.md"`
 - `test -f "references/bug-triage-guide.md"` — 缺陷分析指南存在性检查
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
-- `find "src/modules/{ModuleName}" -maxdepth 4 -type f | sort`
+- 按 `config.json.moduleTemplate` 定位模板目录并读取 `template.json`
+- `find "{targetModulePath}" -maxdepth 4 -type f | sort`
 
 ### 第 2 步：PICK - 锁定本轮修复对象
 
@@ -142,7 +144,7 @@ ONLY FIX BUGS THAT ARE ALREADY REGISTERED IN bugDocs/bug.md
 - 回归过程中发现的新风险，可写入当前条目的 `剩余风险`
 
 **至少执行：**
-- 相关测试文件存在时：`npx jest --testPathPattern='{ModuleName}' --no-coverage` 或项目等效命令
+- 相关测试文件存在时：使用项目等效命令定向运行当前模块测试；内置 `m9-module` 项目可使用 `npx jest --testPathPattern='{module.name}' --no-coverage`
 - 无自动化测试时：按 `bug.md` 的 `复现步骤` 手动验证并记录观察结论
 
 ### 第 6 步：UPDATE - 同步修复进度

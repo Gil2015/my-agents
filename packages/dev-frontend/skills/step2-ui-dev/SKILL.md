@@ -1,15 +1,15 @@
 ---
 name: ui-dev
-description: 当需要基于需求文档、设计上下文、UI 设计稿或直接实现指令，按共享模块模板创建或扩展前端模块时使用
+description: 当需要基于需求文档、设计上下文、UI 设计稿或直接实现指令，按当前业务模块模板创建或扩展前端模块时使用
 ---
 
 # UI 开发
 
 ## 概述
 
-根据需求文档、设计上下文、UI 图或明确的口头描述，在现有业务模块内开发页面与交互，或按共享模板搭建新模块。输出必须能直接进入 `api-integrate` 和后续 `module-test`，而不是只交付一个“先能跑起来”的页面。
+根据需求文档、设计上下文、UI 图或明确的口头描述，在现有业务模块内开发页面与交互，或按当前 mission 指定的业务模块模板搭建新模块。输出必须能直接进入 `api-integrate` 和后续 `module-test`，而不是只交付一个“先能跑起来”的页面。
 
-**核心原则：** 先对齐设计上下文、模板和职责边界，再写具体 UI。结构错了，后面的联调、审计和测试都会变慢。
+**核心原则：** 先定位业务模块模板、读取 `template.json`、对齐设计上下文和职责边界，再写具体 UI。结构错了，后面的联调、审计和测试都会变慢。
 
 **违反规则的字面意思就是违反规则的精神。**
 
@@ -23,22 +23,24 @@ description: 当需要基于需求文档、设计上下文、UI 设计稿或直�
 
 **例外情况（需征询开发者）：**
 - 一次性 PoC 或演示稿，不会进入正式模块体系
-- 明确要求保留旧模块结构，本次不做模板迁移
+- 明确要求保留现有模块结构，本次不按业务模块模板重建
 
 觉得“页面很简单，先糊一个文件再说”？停下来。简单页面最容易因为省结构，把后续每一步都拖慢。
 
 ## 铁律
 
 ```text
-EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
+EVERY NEW MODULE STARTS FROM THE CONFIGURED MODULE TEMPLATE - STRUCTURE FIRST, UI SECOND
 ```
 
 布局里混入请求、状态或业务逻辑，就不是“先把页面写出来”，而是在制造后续联调和测试成本。
 
 **没有例外：**
-- `hooks/useWatcher.ts` 没有副作用也要保留空文件
-- `layouts/` 只做展示，不直接发请求，不直接写业务逻辑
-- 优先沿用 `../../references/module-template/` 的 hooks 组织方式与工程约定，不额外发明一套分层
+- 新建模块必须先按 `config.json.moduleTemplate` 定位业务模块模板目录，并读取 `template.json`
+- 业务模块模板是完整代码目录，新建模块时整套复制到目标模块路径，再替换占位符
+- 必须满足模板 `template.json.requiredFiles`；模板要求保留的空文件也要保留
+- `layouts/` 只做展示，不直接发请求，不直接写业务逻辑；如果项目模板使用不同目录名，以模板职责说明为准
+- 优先沿用当前业务模块模板的 hooks 组织方式与工程约定，不额外发明一套分层
 - 类型先落地，再填实现；禁止一路 `any` 写到底
 
 ## 违反后果
@@ -57,6 +59,8 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 必须先搞清楚：
 - 本次是新建模块，还是在现有模块内扩展
 - 真实目标模块目录名是什么，是否已经写入 `config.json.module.name`
+- 当前 mission 使用哪个 `moduleTemplate.id` 或 `moduleTemplate.root`
+- 当前业务模块模板的目录路径、`targetPath`、`requiredFiles`、`placeholderPatterns`、`forbiddenPatterns`
 - 当前项目的主题接入方式是什么，是否存在 `ConfigProvider` 或自定义 Provider 约束
 - 哪些颜色、字号、间距、圆角、阴影等必须沿用现有 token / CSS Variables
 - 哪些全局组件或 npm 组件必须优先复用，哪些场景才允许新增本地样式或本地组件
@@ -85,16 +89,31 @@ EVERY MODULE STARTS FROM THE SHARED TEMPLATE - STRUCTURE FIRST, UI SECOND
 - `test -f ".ai/missions/{missionId}/config.json"`
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
 
+模板定位规则：
+1. `config.json.moduleTemplate.root` 非空时，直接使用该路径
+2. 否则使用 `{devFrontendRoot}/references/module-templates/{moduleTemplate.id}`
+3. 如果 `moduleTemplate.id` 为空、模板目录不存在、`template.json` 不存在或 `requiredFiles` 缺失，返回 `NEEDS_CONTEXT` / `BLOCKED`
+
 ## 第 2 步：搭建骨架（仅新建模块时）
 
-以以下基线为准：
-- `../../references/module-template/`
+以当前业务模块模板为准：
+- 模板目录
+- `template.json`
+- `template.json.targetPath`
+- `template.json.requiredFiles`
 - `../../references/rules/frontend-code-rules.md`
 
-目标结构至少包含：
+新建模块规则：
+- 将业务模块模板目录完整复制到目标模块路径
+- 复制时排除 `template.json`、`README.md` 等非代码说明文件
+- 复制后替换模块名、显示名、路由名等当前模板中的占位符
+- 按真实业务删除或替换示例组件、示例接口和示例数据
+- 交付前 `template.json.placeholderPatterns` 中的残留必须清空
+
+内置 `m9-module` 目标结构至少包含：
 
 ```text
-src/modules/{ModuleName}/
+{moduleRoot}/{module.name}/
 ├── index.tsx
 ├── defs/
 │   ├── constant.ts
@@ -124,16 +143,18 @@ src/modules/{ModuleName}/
 错误示例：
 
 ```text
-src/modules/{ModuleName}/
+{moduleRoot}/{module.name}/
 ├── index.tsx
 └── page.tsx
 ```
 
-这不是共享模板，只是临时页面。
+这不满足内置 `m9-module` 的业务模块模板，只是临时页面。若项目模板本身就是扁平页面结构，则必须在该模板的 `template.json.requiredFiles` 中明确声明。
 
 **至少执行：**
-- `find "src/modules/{ModuleName}" -maxdepth 3 -type f | sort`
-- `rg -n "index\\.module\\.less|__MODULE_NAME__|ExampleChildComponent" "src/modules/{ModuleName}"`
+- `find "{targetModulePath}" -maxdepth 3 -type f | sort`
+- 按 `template.requiredFiles` 逐项确认文件存在
+- `rg -n "{template.forbiddenPatterns}" "{targetModulePath}"`（将数组模式组合后执行）
+- `rg -n "{template.placeholderPatterns}" "{targetModulePath}"`（将数组模式组合后执行）
 
 ## 第 3 步：先定义契约（defs/）
 
@@ -163,7 +184,7 @@ src/modules/{ModuleName}/
 
 ## 第 5 步：实现布局与组件
 
-`layouts/Default/index.tsx` 必须是纯展示层：
+布局入口必须是纯展示层。内置 `m9-module` 的默认入口是 `layouts/Default/index.tsx`：
 - 只接收 `data` 和 `controllers`
 - 不写请求，不持有业务状态，不绕过 Hook 直接操作 service
 - 样式文件统一使用 `style.module.less`
@@ -181,30 +202,31 @@ src/modules/{ModuleName}/
 ## 第 6 步：收尾校验
 
 逐项检查：
-- [ ] 新模块结构与 `../../references/module-template/` 对齐
-- [ ] `index.tsx` 只负责 `createModule(...)` 组装，不写业务逻辑
-- [ ] `defs/type.ts` 的类型链完整且能连通
-- [ ] `hooks/index.ts` 保持 `useData -> useController -> useWatcher`
-- [ ] `layouts/index.ts` 存在 `LayoutEnum.Default -> Default` 映射
-- [ ] 布局和组件样式文件统一使用 `style.module.less`
+- [ ] 已定位业务模块模板目录，并读取 `template.json`
+- [ ] 新模块结构满足模板 `requiredFiles`
+- [ ] 模板入口文件只负责模块组装，不写业务逻辑
+- [ ] 类型链完整且能连通；内置 `m9-module` 至少检查 `defs/type.ts`
+- [ ] Hook 编排符合模板契约；内置 `m9-module` 保持 `useData -> useController -> useWatcher`
+- [ ] 布局映射符合模板契约；内置 `m9-module` 检查 `layouts/index.ts` 的 `LayoutEnum.Default -> Default` 映射
+- [ ] 布局和组件样式文件符合当前业务模块模板命名约定
 - [ ] 布局层只消费 `data` / `controllers`
 - [ ] 如存在 `design-context.md`，实现已遵循其中的主题接入、token 复用和组件优先级约束
 - [ ] 无新增的硬编码颜色、字号、间距、圆角、阴影等视觉体系常量
 - [ ] 未绕过项目既有 `ConfigProvider` / 自定义 Provider / CSS Variables 另写一套主题
-- [ ] 无 `useState`、`useCallback`、`useMemo`、模板占位符残留
-- [ ] `hooks/useWatcher.ts` 存在（即使当前无副作用，也保留空文件）
+- [ ] 无当前业务模块模板的 `forbiddenPatterns` 和 `placeholderPatterns` 残留
+- [ ] `requiredFiles` 中声明的空文件也已保留
 
 **至少执行：**
-- `rg -n "__MODULE_NAME__|exampleFn|queryExample|ExampleChildComponent" "src/modules/{ModuleName}"`
-- `rg -n "useState|useCallback|useMemo|index\\.module\\.less" "src/modules/{ModuleName}"`
-- `find "src/modules/{ModuleName}" -maxdepth 3 -type f | sort`
+- `rg -n "{template.placeholderPatterns}" "{targetModulePath}"`
+- `rg -n "{template.forbiddenPatterns}" "{targetModulePath}"`
+- `find "{targetModulePath}" -maxdepth 3 -type f | sort`
 
 ## 速查表
 
 | 阶段 | 关键动作 | 完成标准 |
 |------|---------|---------|
 | 读取上下文 | 确认模块边界、数据和交互 | 明确本次是新建还是扩展，输入信息足够落地 |
-| 搭建骨架 | 对齐共享模板结构 | 文件树和命名符合模板基线 |
+| 搭建骨架 | 对齐当前业务模块模板 | 文件树和命名符合模板 `requiredFiles` |
 | 定义契约 | 先写 `defs/` | 类型链和静态配置可支撑后续实现 |
 | 实现 Hook | 按固定顺序落地 | 数据、控制器、副作用职责清晰 |
 | 实现布局 | 保持展示层纯净 | 布局不直接碰 service 和业务状态 |
@@ -233,7 +255,7 @@ src/modules/{ModuleName}/
 | 主题 | 文件 |
 |------|------|
 | 通用规则 | `../../references/rules/common-rules.md` |
-| 共享模块模板 | `../../references/module-template/` |
+| 内置业务模块模板 | `../../references/module-templates/{templateId}/` |
 | 业务侧与工程侧代码规则 | `../../references/rules/frontend-code-rules.md` |
 
 ## 集成关系

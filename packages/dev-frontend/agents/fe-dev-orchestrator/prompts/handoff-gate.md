@@ -11,7 +11,8 @@
 - `candidateNextStep`：准备进入的下一阶段；允许为空，表示只做当前阶段收口
 - `configPath`：`{missionRoot}/config.json`
 - `artifactSnapshot`：mission 中的实际产物清单与关键字段摘要；如果存在项目级 `.ai/docs/design-context.md` 或 `.ai/docs/component-catalog.md`，也要写入摘要
-- `moduleSnapshot`：目标模块目录及关键文件存在情况
+- `moduleTemplateSnapshot`：当前业务模块模板摘要，至少包含模板目录、`template.id`、目标模块路径、`requiredFiles`
+- `moduleSnapshot`：目标模块目录及当前业务模块模板的 `requiredFiles` 存在情况
 - `userGoal`：用户本轮目标，用于判断是否应该继续链路
 
 ## 执行流程
@@ -68,7 +69,7 @@
 - 只根据可验证产物做判断，不根据“通常应该有”来放行。
 - `step1 -> step2` 至少要确认 `reqDocs/req.md` 存在，且模块名可唯一定位。
 - `design-context-build -> step2` 在用户明确要求设计上下文时，至少要确认项目级 `design-context.md` 存在，且文档能说明当前主题 / token / 组件复用约束；若同时存在 `component-catalog.md`，应一并作为组件复用依据；若用户只是可选尝试该 skill，则允许 `SOFT_FAIL` 后直接在当前阶段收口。
-- `step2 -> step3` 至少要确认目标模块目录存在，并具备 `index.tsx`、`defs/`、`hooks/`、`layouts/` 基础骨架。
+- `step2 -> step3` 至少要确认当前业务模块模板已定位、目标模块目录存在，并具备 `template.requiredFiles` 中声明的文件。
 - `step3 -> step4` 至少要确认本轮目标包含问题收集或缺陷链路，且模块代码和必要文档（`reqDocs/req.md`、可选 `apiDoc/api.md`）可用于审查。
 - `step4 -> step5` 至少要确认 `bugDocs/bug.md` 存在，且已有可执行的 `BUG-*` 条目。
 - `step5` 完成后必须确认目标 `BUG-*` 的状态、根因和回归结果已回写；否则不算真正收口。

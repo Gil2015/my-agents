@@ -61,7 +61,7 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 - `.ai/missions/{missionId}/apiDoc/api.md`：接口契约、错误码和边界输入
 - `.ai/missions/{missionId}/bugDocs/bug.md`：若已存在，读取历史 Bug 与当前修复进度
 - `bugDocSources` 中列出的文件或目录：外部问题材料、日志、截图说明、补充文档
-- `src/modules/{ModuleName}/`：实际代码、现有测试、类型和依赖链路
+- 当前业务模块模板 `targetPath` 渲染出的 `{targetModulePath}`：实际代码、现有测试、类型和依赖链路
 - 开发者或用户当前消息：本轮新增问题线索
 
 必须先确认：
@@ -69,6 +69,7 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 - `bugDocSources` 中的路径是否真实存在；缺失路径不能被静默忽略
 - `req.md` 是否足够定义预期行为；如果预期本身不清晰，应回到 `req-collect`
 - 当前模块代码路径是否已经定位清楚；优先读取 `config.json.module.name`，再校验 `req.md` / `api.md` 顶部 `模块名`
+- 当前 mission 的业务模块模板是否能定位，且 `{targetModulePath}` 指向真实模块目录
 
 如果连模块位置、问题来源或需求预期都说不清，就不要假装已经完成审查；先补上下文。
 
@@ -77,7 +78,8 @@ EVERY ACTIONABLE BUG MUST BE WRITTEN TO bugDocs/bug.md BEFORE STEP5 STARTS
 - `test -f ".ai/missions/{missionId}/config.json"`
 - `test -f "references/bug-discovery-guide.md"` — 审查指南存在性检查
 - `find ".ai/missions/{missionId}" -maxdepth 3 -type f | sort`
-- `find "src/modules/{ModuleName}" -maxdepth 4 -type f | sort`
+- 按 `config.json.moduleTemplate` 定位模板目录并读取 `template.json`
+- `find "{targetModulePath}" -maxdepth 4 -type f | sort`
 
 ### 第 2 步：COLLECT - 收口显式问题来源
 

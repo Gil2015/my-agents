@@ -1,16 +1,16 @@
 # 前端代码规则
 
-本文件只保留共享约束，不重复维护模板示例代码。目录形态、导出方式和占位写法以 `../module-template/` 为第一参考源。
+本文件只保留共享约束，不重复维护模板示例代码。目录形态、导出方式和占位写法以当前 mission 指定的业务模块模板为第一参考源。
 
 ## 1. 使用方式
 
-- 新建模块时，先对齐 `../module-template/`，再填充真实业务实现
+- 新建模块时，先按 `config.json.moduleTemplate` 定位业务模块模板目录，读取 `template.json`，再复制该模板代码树并填充真实业务实现
 - 扩展已有模块时，优先沿用现有结构并补齐缺失文件，不另起一套目录约定
-- 如果规则描述与模板不一致，以模板为准完成当前任务，并回写修正文档
+- 如果规则描述与当前业务模块模板不一致，以模板为准完成当前任务，并回写修正文档或 `template.json`
 
 ## 2. 结构底线
 
-共享模板当前约定的基础结构包括：
+业务模块模板的基础结构由 `template.json.requiredFiles` 决定。内置 `m9-module` 当前约定的基础结构包括：
 
 - `index.tsx`
 - `defs/`
@@ -22,7 +22,7 @@
 补充规则：
 
 - `components/` 为按需目录；一旦新增，必须补 `components/index.ts`
-- 交付前必须清理模板占位符、示例组件和示例接口
+- 交付前必须清理 `template.json.placeholderPatterns` 声明的模板占位符、示例组件和示例接口
 - 不要为了“先跑起来”把模块扁平化成单文件页面
 
 ## 3. 职责边界
@@ -38,7 +38,7 @@
 
 ## 4. 类型与契约约束
 
-- 类型链要围绕当前模板已有的 `Props`、`DataParams`、`CtrlParams`、`WatcherParams`、`LayoutProps` 扩展
+- 类型链要围绕当前业务模块模板已有的 `Props`、`DataParams`、`CtrlParams`、`WatcherParams`、`LayoutProps` 等契约扩展；如果项目模板使用不同契约，以该模板为准
 - 接口字段名优先保持与后端契约一致，不在 `type.ts` 中提前改写命名
 - 可空字段使用 `| null` 表达，不要把“可空”伪装成“可选”
 - 展示层衍生字段属于模块数据流，不属于接口契约类型
@@ -46,7 +46,7 @@
 
 ## 5. 当前模板遵循的工程习惯
 
-- 默认使用当前项目模板里的请求封装与导入方式，不额外在规则中再维护一套示例
+- 默认使用当前业务模块模板里的请求封装与导入方式，不额外在规则中再维护一套示例
 - `hooks/index.ts` 与布局层之间的传参契约以当前模板为准
 - 样式文件统一使用 `style.module.less`
 - 样式组织默认使用 CSS Modules + `classNames`
@@ -54,19 +54,19 @@
 
 ## 6. 适配提醒
 
-共享模板包含明显的项目内依赖，跨项目复用时需要先替换：
+内置 `m9-module` 包含明显的项目内依赖，跨项目复用时建议在目标项目复制并调整为项目内模板：
 
 - `createModule`、`http`、`useAtomState` 等工程工具导入
 - `@m9/tools-ui-components` 等业务 UI 组件库导入
 - `mock/global` 等测试桩依赖
 
-如果目标项目没有这些能力，应先调整模板或在项目侧提供兼容层，再继续使用本 skill 套件。
+如果目标项目没有这些能力，应先在 `.ai/dev-frontend/references/module-templates/{templateId}` 调整项目内模板，或在项目侧提供兼容层，再继续使用本 skill 套件。
 
 ## 7. 最终自检
 
-- [ ] 目录结构是否与 `../module-template/` 当前基线一致
+- [ ] 目录结构是否满足当前业务模块模板的 `requiredFiles`
 - [ ] `index.tsx` 是否只做模块组装
 - [ ] `hooks/index.ts` 是否仍按模板契约返回 `data` / `controllers`
 - [ ] 布局层是否没有直接请求和业务状态
 - [ ] `defs/type.ts`、`defs/service.ts`、hooks、布局是否保持同一套契约
-- [ ] 是否清理了 `__MODULE_NAME__`、`ExampleChildComponent`、`queryExample` 等模板残留
+- [ ] 是否清理了当前业务模块模板的 `placeholderPatterns` 残留

@@ -13,7 +13,7 @@
 1. 读取用户目标、当前仓库路径、`missionId` 或 `missionRoot`，确认这轮任务是新建功能、继续开发、接口联调、问题收集、缺陷修复，还是跨阶段恢复。
 2. 检查 mission 是否存在；如果用户要启动新任务且 `config.json` 还不存在，先执行 `scripts/create-mission.sh` 初始化 mission，再继续路由。
 3. 若用户明确要求先整理项目设计规范、主题 token 或组件复用约束，可先调用 `design-context-build`；否则继续主链路路由。
-4. 调用 `route-planner`，根据用户意图、mission 目录现状和模块代码状态，给出最小必要的 skill 序列。
+4. 调用 `route-planner`，根据用户意图、mission 目录现状、当前业务模块模板和模块代码状态，给出最小必要的 skill 序列。
 5. 按路由结果串行执行 skill；调用时统一使用 skill 的绝对路径，不使用快捷别名。
 6. 每完成一个 step，立即调用 `handoff-gate` 校验交接条件，判断是继续到下一步、停在当前阶段，还是回退到更早阶段补上下文。
 7. 向用户汇报当前完成阶段、产物路径、未解决问题和建议的下一步；如果当前轮目标已完成，则停止，不额外延长链路。
@@ -49,7 +49,8 @@
 - 若已存在 `.ai/docs/` 下的设计文档，`design-context-build` 需要先展示拟覆盖内容并获得用户同意，不能静默改写。
 - 如果用户明确说“先做到 1~3”“这轮只做 step2”“下次再做 4/5”，严格按这个范围路由；只有在前置条件缺失时才允许回退到更早阶段。
 - `step1` 不是必经阶段。只要已有明确需求输入，且 `config.json.module.name` 或 `req.md` 顶部 `模块名` 可以唯一定位模块，就允许直接从 `step2` 开始。
-- `step3` 不能在模块骨架缺失时启动；如果用户直接要联调，但模块还没落地，先回到 `step2`。
+- `step2` / `step3` / `step4` / `step5` 涉及代码目录时，必须先按 `config.json.moduleTemplate` 定位业务模块模板并读取 `template.json`；模板缺失时停止，不静默使用默认模板。
+- `step3` 不能在模块骨架缺失时启动；如果用户直接要联调，但模块还没落地或不满足当前业务模块模板的 `requiredFiles`，先回到 `step2`。
 - `step4` 负责建档和审查，不负责修代码；如果用户想“先整理问题再修”，先到 `step4`，是否进入 `step5` 由本轮目标和 `handoff-gate` 决定。
 - `step5` 只修已经登记进 `bugDocs/bug.md` 的 `BUG-*`；回归时发现独立新问题，必须回到 `step4` 先建档。
 - 如果 `req.md`、`api.md`、`bug.md` 中的预期定义不充分，优先回退补文档，不要让后续 step 以猜测继续。
@@ -78,7 +79,7 @@
 | `INIT` | `{missionRoot}/config.json` 存在，或已成功初始化 mission | 若是新任务则先初始化；若是恢复旧任务但 mission 不明确，则返回 `NEEDS_CONTEXT` |
 | `DESIGN_TO_STEP2` | 用户本轮明确要求设计上下文时，项目级 `design-context.md` 至少存在一份，且可说明当前主题 / token / 组件复用约束；若存在 `component-catalog.md`，一并作为复用依据 | 先补 `design-context-build` 产物，或在用户接受缺口后直接从 `step2` 收口说明 |
 | `STEP1_TO_STEP2` | `reqDocs/req.md` 存在，且模块名可由 `config.json.module.name` 或 `req.md` 顶部信息唯一定位 | 回到 `req-collect` 继续补齐需求或模块信息 |
-| `STEP2_TO_STEP3` | 目标模块目录存在，且至少具备 `index.tsx`、`defs/`、`hooks/`、`layouts/` 基础骨架 | 先补 `ui-dev` 结构，不进入 `api-integrate` |
+| `STEP2_TO_STEP3` | 当前业务模块模板已定位，目标模块目录存在，且满足 `template.requiredFiles` | 先补 `ui-dev` 结构，不进入 `api-integrate` |
 | `STEP3_TO_STEP4` | 本轮目标包含问题收集或缺陷链路，且模块代码和必要文档可用于审查 | 若用户只要求开发到联调完成，则在 `step3` 收口 |
 | `STEP4_TO_STEP5` | `bugDocs/bug.md` 存在，且已有可执行的 `BUG-*` 条目 | 留在 `module-test` 继续补证据或等待用户确认修复范围 |
 | `STEP5_DONE` | 目标 `BUG-*` 已更新状态、根因、回归结果，顶部摘要与条目状态一致 | 继续回归或补文档，不得宣称修复完成 |

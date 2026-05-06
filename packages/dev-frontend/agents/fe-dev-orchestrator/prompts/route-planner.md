@@ -14,7 +14,8 @@
 - `requestedRange`：用户是否明确指定只做某几个阶段，如 `step1~3`、`step4~5`、`only-step2`
 - `configPath`：`{missionRoot}/config.json`，如果已存在
 - `artifactSnapshot`：mission 内已有文件列表，至少包含 `reqDocs/`、`apiDoc/`、`bugDocs/` 的存在情况；若能取得项目级 `.ai/docs/design-context.md` / `.ai/docs/component-catalog.md` 也一并提供
-- `moduleSnapshot`：目标模块目录是否存在，以及关键骨架文件是否存在
+- `moduleTemplateSnapshot`：当前业务模块模板摘要，至少包含模板目录、`template.id`、目标模块路径、`requiredFiles`
+- `moduleSnapshot`：目标模块目录是否存在，以及当前业务模块模板的 `requiredFiles` 是否都存在
 - `extraContext`：用户额外提供的需求、UI、设计规范、API、bug 说明
 
 ## 执行流程
@@ -23,7 +24,7 @@
    - 若为 `resume`：按 mission 产物现状从后往前检查（`bugDocs/bug.md` → `apiDoc/api.md` → `reqDocs/req.md` → `config.json`），找到最后完成的阶段，以下一步为起始点。
 2. 检查 `missionRoot` 和 `configPath` 是否存在；若本轮是新任务且 mission 尚未初始化，输出先初始化 mission 的结论。
 3. 若用户明确要求先整理项目设计规范、主题 token、组件复用约束，或要求 UI 开发必须沿用项目既有风格，而当前又没有可用的项目级 `design-context.md` / `component-catalog.md`，先把 `design-context-build` 放进 skill 序列。
-4. 结合 `artifactSnapshot` 和 `moduleSnapshot`，判断当前最早可进入的有效阶段，以及是否必须回退到更早步骤补上下文。
+4. 结合 `artifactSnapshot`、`moduleTemplateSnapshot` 和 `moduleSnapshot`，判断当前最早可进入的有效阶段，以及是否必须回退到更早步骤补上下文。
 5. 只选择满足当前目标所需的最小 skill 序列，不默认扩展到 `step5`，也不要默认追加 `design-context-build`。
 6. 给出明确停止点：这轮是停在 `design-context-build`、`step1`、`step3`、`step4` 还是 `step5`，以及为什么。
 7. 如果用户想从中途开始，检查是否真的满足当前阶段前置条件；不满足时输出回退原因，不要硬跑。
@@ -73,6 +74,8 @@
 - 用户明确只做某一段时，优先尊重用户范围，再做最小回退。
 - 允许直接从 `step2` 或 `step4` 开始，但前提是当前阶段输入已经足够。
 - 如果已经存在可用的项目级 `design-context.md` / `component-catalog.md`，不要重复选择 `design-context-build`，除非用户明确要求刷新设计文档。
+- 进入 `step2` 及后续代码相关阶段前，必须确认当前业务模块模板可定位且 `template.json` 可读取；失败时输出 `BLOCKED` 或 `NEEDS_CONTEXT`，不要让后续阶段猜模板。
+- 判断 `step2 -> step3` 时，按当前业务模块模板的 `requiredFiles` 检查骨架，不使用固定目录清单。
 - 只要 `BUG-*` 尚未登记，就不要把修复直接路由到 `step5`。
 - 需求本身不清楚时，优先回到 `step1`，不要把需求缺口伪装成代码或缺陷问题。
 - 调用路径必须写成完整 skill 路径，不使用简称或口头别名。
