@@ -1,0 +1,21 @@
+{
+  "id": "gz-module",
+  "displayName": "国智 业务模块模板",
+  "targetPath": "{moduleRoot}/{module.name}",
+  "requiredFiles": [
+    "index.tsx",
+    "defs/constant.ts",
+    "defs/type.ts",
+    "defs/service.ts",
+    "hooks/index.ts",
+    "hooks/useData.ts",
+    "hooks/useController.ts",
+    "hooks/useWatcher.ts",
+    "layouts/index.ts",
+    "layouts/Default/index.tsx",
+    "layouts/Default/style.module.less",
+    "__test__/index.tsx",
+    "__test__/mock.ts",
+    "utils.ts"
+  ]
+}
