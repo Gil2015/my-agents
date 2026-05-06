@@ -1,5 +1,4 @@
 {
-  "schemaVersion": 1,
   "id": "m9-module",
   "displayName": "M9 业务模块模板",
   "targetPath": "{moduleRoot}/{module.name}",
@@ -18,18 +17,5 @@
     "__test__/index.tsx",
     "__test__/mock.ts",
     "utils.ts"
-  ],
-  "placeholderPatterns": [
-    "__MODULE_NAME__",
-    "ExampleChildComponent",
-    "exampleFn",
-    "queryExample",
-    "example/queryExample"
-  ],
-  "forbiddenPatterns": [
-    "index\\.module\\.less",
-    "useState",
-    "useCallback",
-    "useMemo"
   ]
 }

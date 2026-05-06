@@ -22,7 +22,7 @@
 补充规则：
 
 - `components/` 为按需目录；一旦新增，必须补 `components/index.ts`
-- 交付前必须清理 `template.json.placeholderPatterns` 声明的模板占位符、示例组件和示例接口
+- 交付前必须清理模板占位符、示例组件和示例接口
 - 不要为了“先跑起来”把模块扁平化成单文件页面
 
 ## 3. 职责边界
@@ -69,4 +69,4 @@
 - [ ] `hooks/index.ts` 是否仍按模板契约返回 `data` / `controllers`
 - [ ] 布局层是否没有直接请求和业务状态
 - [ ] `defs/type.ts`、`defs/service.ts`、hooks、布局是否保持同一套契约
-- [ ] 是否清理了当前业务模块模板的 `placeholderPatterns` 残留
+- [ ] 是否清理了模板占位符、示例组件和示例接口残留

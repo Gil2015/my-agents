@@ -133,7 +133,7 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 2. `{projectRoot}/.ai/dev-frontend/references/module-templates/{moduleTemplate.id}`
 3. `{devFrontendRoot}/references/module-templates/{moduleTemplate.id}`
 
-定位到模板目录后，直接读取其中的 `template.json`。`template.json` 负责声明目标路径、必需文件和占位符清理规则。
+定位到模板目录后，直接读取其中的 `template.json`。`template.json` 只负责声明模板标识、目标路径和必需文件。
 
 如果项目希望固定默认模板，可以在项目 `AGENTS.md` 中写明约定，例如“新 mission 创建后将 `moduleTemplate.id` 改为 `table-page`”。最终执行时仍以当前 mission 的 `config.json.moduleTemplate` 为准，避免不同 step 对模板选择产生分歧。
 
@@ -154,13 +154,10 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 
 ```json
 {
-  "schemaVersion": 1,
   "id": "table-page",
   "displayName": "表格页业务模块模板",
   "targetPath": "{moduleRoot}/{module.name}",
-  "requiredFiles": ["index.tsx", "defs/type.ts", "hooks/index.ts"],
-  "placeholderPatterns": ["__MODULE_NAME__", "queryExample"],
-  "forbiddenPatterns": ["index\\.module\\.less"]
+  "requiredFiles": ["index.tsx", "defs/type.ts", "hooks/index.ts"]
 }
 ```
 

@@ -60,7 +60,7 @@ EVERY NEW MODULE STARTS FROM THE CONFIGURED MODULE TEMPLATE - STRUCTURE FIRST, U
 - 本次是新建模块，还是在现有模块内扩展
 - 真实目标模块目录名是什么，是否已经写入 `config.json.module.name`
 - 当前 mission 使用哪个 `moduleTemplate.id` 或 `moduleTemplate.root`
-- 当前业务模块模板的目录路径、`targetPath`、`requiredFiles`、`placeholderPatterns`、`forbiddenPatterns`
+- 当前业务模块模板的目录路径、`targetPath`、`requiredFiles`
 - 当前项目的主题接入方式是什么，是否存在 `ConfigProvider` 或自定义 Provider 约束
 - 哪些颜色、字号、间距、圆角、阴影等必须沿用现有 token / CSS Variables
 - 哪些全局组件或 npm 组件必须优先复用，哪些场景才允许新增本地样式或本地组件
@@ -107,8 +107,7 @@ EVERY NEW MODULE STARTS FROM THE CONFIGURED MODULE TEMPLATE - STRUCTURE FIRST, U
 - 将业务模块模板目录完整复制到目标模块路径
 - 复制时排除 `template.json`、`README.md` 等非代码说明文件
 - 复制后替换模块名、显示名、路由名等当前模板中的占位符
-- 按真实业务删除或替换示例组件、示例接口和示例数据
-- 交付前 `template.json.placeholderPatterns` 中的残留必须清空
+- 按真实业务删除或替换占位符、示例组件、示例接口和示例数据
 
 内置 `m9-module` 目标结构至少包含：
 
@@ -153,8 +152,8 @@ EVERY NEW MODULE STARTS FROM THE CONFIGURED MODULE TEMPLATE - STRUCTURE FIRST, U
 **至少执行：**
 - `find "{targetModulePath}" -maxdepth 3 -type f | sort`
 - 按 `template.requiredFiles` 逐项确认文件存在
-- `rg -n "{template.forbiddenPatterns}" "{targetModulePath}"`（将数组模式组合后执行）
-- `rg -n "{template.placeholderPatterns}" "{targetModulePath}"`（将数组模式组合后执行）
+- 内置 `m9-module` 至少执行：`rg -n "__MODULE_NAME__|exampleFn|queryExample|ExampleChildComponent" "{targetModulePath}"`
+- 内置 `m9-module` 至少执行：`rg -n "useState|useCallback|useMemo|index\\.module\\.less" "{targetModulePath}"`
 
 ## 第 3 步：先定义契约（defs/）
 
@@ -213,12 +212,12 @@ EVERY NEW MODULE STARTS FROM THE CONFIGURED MODULE TEMPLATE - STRUCTURE FIRST, U
 - [ ] 如存在 `design-context.md`，实现已遵循其中的主题接入、token 复用和组件优先级约束
 - [ ] 无新增的硬编码颜色、字号、间距、圆角、阴影等视觉体系常量
 - [ ] 未绕过项目既有 `ConfigProvider` / 自定义 Provider / CSS Variables 另写一套主题
-- [ ] 无当前业务模块模板的 `forbiddenPatterns` 和 `placeholderPatterns` 残留
+- [ ] 无模板占位符、示例组件、示例接口和当前模板禁用写法残留
 - [ ] `requiredFiles` 中声明的空文件也已保留
 
 **至少执行：**
-- `rg -n "{template.placeholderPatterns}" "{targetModulePath}"`
-- `rg -n "{template.forbiddenPatterns}" "{targetModulePath}"`
+- 内置 `m9-module`：`rg -n "__MODULE_NAME__|exampleFn|queryExample|ExampleChildComponent" "{targetModulePath}"`
+- 内置 `m9-module`：`rg -n "useState|useCallback|useMemo|index\\.module\\.less" "{targetModulePath}"`
 - `find "{targetModulePath}" -maxdepth 3 -type f | sort`
 
 ## 速查表

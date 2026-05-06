@@ -117,7 +117,7 @@ export const services = {
 - `moduleTemplate.root` 非空时，直接使用该路径
 - 否则使用 `{devFrontendRoot}/references/module-templates/{moduleTemplate.id}`
 - 使用模板 `targetPath` 渲染出的 `{targetModulePath}` 作为目标模块代码目录
-- 使用模板 `requiredFiles`、`placeholderPatterns`、`forbiddenPatterns` 作为结构和残留校验来源
+- 使用模板 `requiredFiles` 作为结构校验来源；占位符和示例接口按当前模板说明清理
 
 若缺少以下任一关键信息，不要继续写 `service.ts`：
 - HTTP 方法
@@ -201,7 +201,7 @@ export const services = {
 规则：
 - 后端未就绪时，mock 是“契约镜像”，不是随意编数据
 - 已知会触发边界逻辑的字段，要在 mock 中体现，如空列表、`null` 状态、错误码
-- 删除当前业务模块模板的 `placeholderPatterns` 残留
+- 删除当前业务模块模板的占位符、示例接口和示例 mock 残留
 
 ## 第 6 步：接入 `hooks/useData.ts`
 
@@ -243,8 +243,7 @@ const tableData = useCreation(
 - [ ] 模板占位符和示例接口已清理
 
 **至少执行：**
-- `rg -n "{template.placeholderPatterns}" "{targetModulePath}"`
-- `rg -n "{template.forbiddenPatterns}" "{targetModulePath}"`
+- 内置 `m9-module`：`rg -n "__MODULE_NAME__|queryExample|example/queryExample" "{targetModulePath}"`
 - `rg -n "services =|useRequest\\(|useCreation\\(" "{targetModulePath}"`
 - `test -f ".ai/missions/{missionId}/apiDoc/api.md"`
 
