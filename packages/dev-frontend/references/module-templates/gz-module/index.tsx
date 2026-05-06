@@ -1,5 +1,5 @@
 import { createModule } from "../../utils";
-import { MODULE_NAME, moduleAtom } from "./defs/constant";
+import { MODULE_NAME, moduleStore } from "./defs/constant";
 import type { ModuleRef, Props } from "./defs/type";
 import useHooks from "./hooks";
 import layouts from "./layouts";
@@ -12,7 +12,7 @@ export default createModule<ModuleRef, Props>({
   displayName: MODULE_NAME,
   layouts,
   useHooks,
-  atom: moduleAtom, // 没有可删
+  store: moduleStore, // 没有可删
 });
 
 export type { ModuleRef, Props };

@@ -55,8 +55,8 @@ export interface DataState {
   rowData: any[];
 }
 
-// 如需跨组件共享状态，定义 AtomState 并在 constant.ts 中创建 atom（没有可删）
-export interface AtomState {
+// 如需跨组件共享状态，定义 ScopeState 并在 constant.ts 中创建 atom（没有可删）
+export interface ScopeState {
   exampleField: string;
 }
 

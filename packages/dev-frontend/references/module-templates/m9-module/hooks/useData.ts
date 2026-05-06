@@ -5,7 +5,7 @@
  *********************************************************************/
 import { useRequest, useSetState } from "ahooks";
 import { useAtomState } from "../../../hooks"; // 如有跨组件共享状态，按需引入 useAtomState 和对应 atom（没有可删）
-import { moduleAtom } from "../defs/constant";
+import { MODULE_NAME, moduleAtom } from "../defs/constant";
 import { services } from "../defs/service";
 import { DataParams, DataState } from "../defs/type";
 
@@ -13,7 +13,7 @@ import { DataParams, DataState } from "../defs/type";
  * 模块数据 hook
  */
 const useData = (_p: DataParams) => {
-  const [moduleState, setModuleState] = useAtomState(moduleAtom); // （可删）
+  const [scopeState, setScopeState] = useAtomState(moduleAtom, MODULE_NAME); // （可删）
   const [dataState, setDataState] = useSetState<DataState>({
     rowData: [], // （可删）
   });
@@ -32,8 +32,8 @@ const useData = (_p: DataParams) => {
     ...dataState,
     setDataState,
     runTableData,
-    // moduleState,
-    // setModuleState,
+    // scopeState,
+    // setScopeState,
   };
 };
 

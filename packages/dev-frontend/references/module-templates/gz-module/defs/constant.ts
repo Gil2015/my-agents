@@ -1,5 +1,5 @@
-import { atom } from 'jotai';
-import type { AtomState } from './type';
+import { create } from 'zustand';
+import type { ScopeState } from './type';
 
 /**********************************************************************
  * 常量定义
@@ -24,8 +24,8 @@ export enum LayoutEnum {
 }
 
 /**
- * 模块共享全局 atom，如没有可删
+ * 模块共享全局 store，如没有可删
  */
-export const moduleAtom = atom<AtomState>({
+export const moduleStore = create<ScopeState>(() => ({
   exampleField: '',
-});
+}));

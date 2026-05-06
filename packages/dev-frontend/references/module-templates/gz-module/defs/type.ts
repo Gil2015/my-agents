@@ -28,9 +28,17 @@ export interface ModuleRef {
 }
 
 /**
+ * 模块外部依赖 stores（如果没有可删）
+ */
+interface ModuleDepStores {
+  /** 页面/业务流共享状态 */
+  scopeStore?: ModuleStore<ScopeState & { [key: string]: any }>;
+}
+
+/**
  * 业务模块公共配置
  */
-export interface Props extends ModuleProps<ModuleActions> {
+export interface Props extends ModuleProps<ModuleActions, ModuleDepStores> {
   /** 业务布局方式 */
   layout?: LayoutEnum | React.ComponentType<any>;
 }
@@ -55,8 +63,8 @@ export interface DataState {
   rowData: any[];
 }
 
-// 如需跨组件共享状态，定义 AtomState 并在 constant.ts 中创建 atom（没有可删）
-export interface AtomState {
+// 如需跨组件共享状态，定义 ScopeState 并在 constant.ts 中创建 zustand store（没有可删）
+export interface ScopeState {
   exampleField: string;
 }
 
