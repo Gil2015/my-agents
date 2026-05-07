@@ -28,9 +28,17 @@ export interface ModuleRef {
 }
 
 /**
+ * 模块外部依赖 atoms（如果没有可删）
+ */
+interface ModuleDepAtoms {
+  /** 页面/业务流共享状态 */
+  scopeAtom?: ModuleAtom<ScopeState & { [key: string]: any }>;
+}
+
+/**
  * 业务模块公共配置
  */
-export interface Props extends ModuleProps<ModuleActions> {
+export interface Props extends ModuleProps<ModuleActions, ModuleDepAtoms> {
   /** 业务布局方式 */
   layout?: LayoutEnum | React.ComponentType<any>;
 }
