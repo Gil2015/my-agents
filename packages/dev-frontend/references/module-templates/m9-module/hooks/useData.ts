@@ -12,8 +12,9 @@ import { DataParams, DataState } from "../defs/type";
 /**
  * 模块数据 hook
  */
-const useData = (_p: DataParams) => {
-  const [scopeState, setScopeState] = useAtomState(moduleAtom, MODULE_NAME); // （可删）
+const useData = (p: DataParams) => {
+  const scopeAtom = p.atoms?.scopeAtom ?? moduleAtom;
+  const [scopeState, setScopeState] = useAtomState(scopeAtom, MODULE_NAME); // （可删）
   const [dataState, setDataState] = useSetState<DataState>({
     rowData: [], // （可删）
   });
