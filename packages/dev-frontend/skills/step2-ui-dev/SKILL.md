@@ -105,7 +105,7 @@ EVERY NEW MODULE STARTS FROM THE CONFIGURED MODULE TEMPLATE - STRUCTURE FIRST, U
 
 新建模块规则：
 - 将业务模块模板目录完整复制到目标模块路径
-- 复制时排除 `template.json`、`README.md` 等非代码说明文件
+- 复制时排除 `template.json` 等非代码说明文件
 - 复制后替换模块名、显示名、路由名等当前模板中的占位符
 - 按真实业务删除或替换占位符、示例组件、示例接口和示例数据
 

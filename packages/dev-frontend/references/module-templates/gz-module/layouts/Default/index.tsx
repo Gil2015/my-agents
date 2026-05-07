@@ -8,8 +8,8 @@ import { ExampleChildComponent } from '../../components';
 import { LayoutProps } from '../../defs/type';
 import styles from './style.module.less';
 
-export default ({ data: _, controllers: $ }: LayoutProps) => {
-  const wrapperClass = classNames(styles.wrapper);
+export default ({ data: _, controllers: $, className }: LayoutProps) => {
+  const wrapperClass = classNames(styles.wrapper, className);
 
   return (
     <div className={wrapperClass}>

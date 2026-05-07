@@ -142,7 +142,6 @@ sh .ai/dev-frontend/scripts/create-mission.sh
 ```text
 .ai/dev-frontend/references/module-templates/table-page/
 ├── template.json
-├── README.md
 ├── index.tsx
 ├── defs/
 ├── hooks/
