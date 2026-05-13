@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gai.local/dev-frontend-pro/impact-map.schema.json",
+  "title": "dev-frontend-pro impact map",
+  "type": "object",
+  "required": ["items"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["reqId", "ui", "data", "states", "tests"],
+        "properties": {
+          "reqId": { "type": "string" },
+          "ui": { "type": "array", "items": { "type": "string" } },
+          "data": { "type": "array", "items": { "type": "string" } },
+          "api": { "type": "array", "items": { "type": "string" } },
+          "states": { "type": "array", "items": { "type": "string" } },
+          "tests": { "type": "array", "items": { "type": "string" } },
+          "openQuestions": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

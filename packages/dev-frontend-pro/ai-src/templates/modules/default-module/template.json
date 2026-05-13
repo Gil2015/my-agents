@@ -1,0 +1,12 @@
+{
+  "id": "default-module",
+  "displayName": "默认业务模块模板",
+  "targetPath": "{moduleRoot}/{module.name}",
+  "requiredFiles": [
+    "index.tsx",
+    "defs/type.ts",
+    "defs/service.ts",
+    "hooks/index.ts",
+    "layouts/index.ts"
+  ]
+}

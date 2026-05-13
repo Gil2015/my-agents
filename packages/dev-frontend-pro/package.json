@@ -1,0 +1,10 @@
+{
+  "name": "@gai/dev-frontend-pro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "前端开发 pro 工作流智能体集合",
+  "type": "module",
+  "scripts": {
+    "test": "node --test scripts/*.test.mjs"
+  }
+}

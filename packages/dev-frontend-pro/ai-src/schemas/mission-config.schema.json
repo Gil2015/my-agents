@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gai.local/dev-frontend-pro/mission-config.schema.json",
+  "title": "dev-frontend-pro mission config",
+  "type": "object",
+  "required": ["schemaVersion", "projectRoot", "aiRoot", "aiSrcRoot", "moduleRoot", "moduleTemplate", "module", "mission"],
+  "properties": {
+    "schemaVersion": { "const": "dev-frontend-pro.mission.v1" },
+    "projectRoot": { "type": "string", "minLength": 1 },
+    "aiRoot": { "type": "string", "minLength": 1 },
+    "aiSrcRoot": { "type": "string", "minLength": 1 },
+    "moduleRoot": { "type": "string" },
+    "componentRoot": { "type": "string" },
+    "uiLibPackage": { "type": "string" },
+    "moduleTemplate": {
+      "type": "object",
+      "required": ["id", "root"],
+      "properties": {
+        "id": { "type": "string" },
+        "root": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "module": {
+      "type": "object",
+      "required": ["name", "displayName", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "reqDocSources": { "type": "array", "items": { "type": "string" } },
+    "apiDocSources": { "type": "array", "items": { "type": "string" } },
+    "bugDocSources": { "type": "array", "items": { "type": "string" } },
+    "mission": {
+      "type": "object",
+      "required": ["id", "root", "createdAt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "root": { "type": "string", "minLength": 1 },
+        "createdAt": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
